@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои чаты - All Mention Bot</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📱 Мои чаты</h1>
+            <p>Список чатов, где добавлен бот</p>
+        </div>
+        
+        <div class="stats"></div>
+        
+        <div class="chats-section">
+            <div class="section-title">
+                <span>💬</span>
+                <span>Список чатов</span>
+            </div>
+            <div class="loading" style="display: none;">Загрузка...</div>
+            <div class="chat-list"></div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
+
