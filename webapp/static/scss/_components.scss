@@ -6,13 +6,13 @@
   width: 42px;
   height: 42px;
   border-radius: 0;
-  border: none;
+  border: 1px solid var(--color-border);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   background: var(--color-bg-soft);
-  transition: transform $transition-fast, background $transition-fast;
+  transition: transform $transition-fast, background $transition-fast, border-color $transition-fast;
 
   i {
     width: 18px;
@@ -23,6 +23,7 @@
   &:hover {
     transform: translateY(-1px);
     background: var(--color-hover);
+    border-color: var(--color-accent);
   }
 
   &:active {
@@ -36,13 +37,13 @@
   width: 42px;
   height: 42px;
   border-radius: 0;
-  border: none;
+  border: 1px solid var(--color-border);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   background: var(--color-bg-soft);
-  transition: transform $transition-fast, background $transition-fast;
+  transition: transform $transition-fast, background $transition-fast, border-color $transition-fast;
 
   i {
     width: 18px;
@@ -53,10 +54,34 @@
   &:hover {
     transform: translateY(-1px);
     background: var(--color-hover);
+    border-color: var(--color-accent);
   }
 
   &:active {
     transform: translateY(1px) scale(0.98);
+  }
+}
+
+.stats-toggle {
+  @include button-reset;
+  border-radius: 0;
+  border: 1px solid var(--color-border);
+  padding: $space-sm $space-md;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--color-bg-soft);
+  color: var(--color-text);
+  font-size: $font-size-sm;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover {
+    background: var(--color-hover);
+    border-color: var(--color-accent);
   }
 }
 
@@ -113,13 +138,14 @@
   padding: $space-md;
   background: var(--color-bg-soft);
   border-radius: 0;
-  border: none;
+  border: 1px solid var(--color-border);
   cursor: pointer;
-  transition: transform $transition-base, background $transition-base;
+  transition: transform $transition-base, background $transition-base, border-color $transition-base;
 
   &:hover {
     transform: translateY(-1px);
     background: var(--color-hover);
+    border-color: var(--color-accent);
   }
 }
 
@@ -174,6 +200,7 @@
 
 .chat-type {
   @include pill;
+  border: 1px solid var(--color-border);
 }
 
 .chat-delete-btn {
@@ -181,7 +208,7 @@
   width: 32px;
   height: 32px;
   border-radius: 0;
-  border: none;
+  border: 1px solid var(--color-border);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -197,6 +224,7 @@
 
   &:hover {
     background: var(--color-hover);
+    border-color: var(--color-accent);
   }
 
   &:active {
@@ -224,14 +252,15 @@
 .filter-select {
   background: var(--color-bg-soft);
   border-radius: 0;
-  border: none;
+  border: 1px solid var(--color-border);
   color: var(--color-text);
   font-size: $font-size-sm;
   padding: $space-sm $space-md;
-  transition: background $transition-fast;
+  transition: background $transition-fast, border-color $transition-fast;
 
   &:focus {
-    @include focus-ring;
+    border-color: var(--color-accent);
+    outline: none;
   }
 }
 
@@ -243,7 +272,7 @@
 .refresh-btn {
   @include button-reset;
   border-radius: 0;
-  border: none;
+  border: 1px solid var(--color-border);
   padding: $space-sm $space-md;
   display: inline-flex;
   align-items: center;
@@ -265,6 +294,7 @@
   &:hover {
     transform: translateY(-1px);
     background: var(--color-hover);
+    border-color: var(--color-accent);
   }
 
   &:active {
@@ -303,12 +333,14 @@
   padding: $space-md;
   border-radius: 0;
   background: var(--color-bg-soft);
-  border: none;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
   transition: all $transition-fast;
 
   &:hover {
     transform: translateY(-1px);
     background: var(--color-hover);
+    border-color: var(--color-accent);
   }
 }
 
@@ -332,6 +364,7 @@
 
 .member-badge {
   @include pill;
+  border: 1px solid var(--color-border);
 
   &.admin,
   &.creator,
@@ -345,7 +378,7 @@
   width: 34px;
   height: 34px;
   border-radius: 0;
-  border: none;
+  border: 1px solid var(--color-border);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -360,6 +393,7 @@
 
   &:hover {
     background: var(--color-hover);
+    border-color: var(--color-accent);
   }
 }
 
@@ -374,7 +408,7 @@
 .pagination-btn {
   @include button-reset;
   border-radius: 0;
-  border: none;
+  border: 1px solid var(--color-border);
   padding: 8px 18px;
   display: inline-flex;
   align-items: center;
@@ -390,6 +424,7 @@
   &:hover:not(:disabled) {
     color: var(--color-accent);
     background: var(--color-hover);
+    border-color: var(--color-accent);
   }
 
   &:disabled {

@@ -24,6 +24,7 @@ body {
   --color-text-soft: #{$color-text-soft-dark};
   --color-accent: #{$color-accent-dark};
   --color-hover: #{$color-hover-dark};
+  --color-border: #{$color-accent-dark};
 }
 
 body.theme-light {
@@ -35,6 +36,7 @@ body.theme-light {
   --color-text-soft: #{$color-text-soft-light};
   --color-accent: #{$color-accent-light};
   --color-hover: #{$color-hover-light};
+  --color-border: #{$color-accent-light};
 }
 
 body {
