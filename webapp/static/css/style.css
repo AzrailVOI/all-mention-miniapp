@@ -632,8 +632,7 @@ body {
         text-align: center;
     }
     
-    .chat-icon,
-    .chat-avatar {
+    .chat-icon {
         margin-right: 0;
         margin-bottom: 10px;
     }

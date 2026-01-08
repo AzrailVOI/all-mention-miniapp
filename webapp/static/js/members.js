@@ -139,10 +139,10 @@ function renderMembers(members) {
             const isGif = urlLower.includes('.gif');
             
             if (isVideo) {
-                // Видео аватарка
+                // Видео аватарка с автопроигрыванием
                 avatarHtml = `<video class="member-avatar-img" autoplay loop muted playsinline><source src="${escapeHtml(photoUrl)}" type="video/mp4"></video>`;
             } else {
-                // Обычное фото или GIF (оба отображаются через img)
+                // Обычное фото или GIF (оба отображаются через img, GIF будет автопроигрываться)
                 avatarHtml = `<img class="member-avatar-img" src="${escapeHtml(photoUrl)}" alt="${escapeHtml(displayName)}" onerror="this.parentElement.innerHTML='<div class=\\'member-avatar-text\\'>${initials}</div>'" />`;
             }
         } else {
