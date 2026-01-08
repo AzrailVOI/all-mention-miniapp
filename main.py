@@ -1,7 +1,8 @@
 """Главный файл запуска бота"""
 import logging
 import threading
-from telegram.ext import Application, CommandHandler, MessageHandler, filters
+from telegram import Update
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
 from bot.config import Config
 from bot.handlers.commands import start_command, chats_command, register_chat_command
