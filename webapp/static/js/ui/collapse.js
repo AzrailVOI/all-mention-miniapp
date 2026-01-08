@@ -5,7 +5,8 @@
 let isExpanded = false;
 
 /**
- * Переключает состояние всех блоков (сворачивает/разворачивает)
+ * Переключает состояние блока статистики (сворачивает/разворачивает)
+ * Блок списка чатов всегда остается открытым
  * @param {boolean} forceState - Принудительное состояние (опционально)
  */
 function toggleAllBlocks(forceState = null) {
@@ -21,7 +22,7 @@ function toggleAllBlocks(forceState = null) {
         isExpanded = !isExpanded;
     }
     
-    // Применяем классы для анимации
+    // Применяем классы для анимации только к блоку статистики
     if (statsSection) {
         if (isExpanded) {
             statsSection.classList.remove('collapsed');
@@ -32,14 +33,10 @@ function toggleAllBlocks(forceState = null) {
         }
     }
     
+    // Блок списка чатов всегда открыт
     if (chatsSection) {
-        if (isExpanded) {
-            chatsSection.classList.remove('collapsed');
-            chatsSection.classList.add('expanded');
-        } else {
-            chatsSection.classList.remove('expanded');
-            chatsSection.classList.add('collapsed');
-        }
+        chatsSection.classList.remove('collapsed');
+        chatsSection.classList.add('expanded');
     }
     
     // Обновляем иконку и текст кнопки
@@ -50,17 +47,17 @@ function toggleAllBlocks(forceState = null) {
             if (toggleIcon) {
                 toggleIcon.setAttribute('data-lucide', 'chevron-up');
             }
-            toggleBtn.setAttribute('title', 'Свернуть все блоки');
+            toggleBtn.setAttribute('title', 'Свернуть статистику');
             if (toggleText) {
-                toggleText.textContent = 'Свернуть все';
+                toggleText.textContent = 'Свернуть статистику';
             }
         } else {
             if (toggleIcon) {
                 toggleIcon.setAttribute('data-lucide', 'chevron-down');
             }
-            toggleBtn.setAttribute('title', 'Развернуть все блоки');
+            toggleBtn.setAttribute('title', 'Развернуть статистику');
             if (toggleText) {
-                toggleText.textContent = 'Развернуть все';
+                toggleText.textContent = 'Развернуть статистику';
             }
         }
         
@@ -72,10 +69,11 @@ function toggleAllBlocks(forceState = null) {
 }
 
 /**
- * Инициализирует сворачивание блоков (по умолчанию все свернуты)
+ * Инициализирует сворачивание блоков
+ * По умолчанию сворачивается только блок статистики, список чатов всегда открыт
  */
 function initCollapse() {
-    // Сворачиваем все блоки по умолчанию
+    // Сворачиваем только блок статистики по умолчанию
     toggleAllBlocks(false);
 }
 
