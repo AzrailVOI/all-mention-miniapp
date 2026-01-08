@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ES2020",
+    "lib": ["ES2020", "DOM"],
+    "outDir": "./webapp/static/js",
+    "rootDir": "./webapp/static/ts",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "declaration": false,
+    "sourceMap": false,
+    "removeComments": false
+  },
+  "include": [
+    "webapp/static/ts/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

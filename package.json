@@ -1,0 +1,12 @@
+{
+  "name": "all-mention-miniapp",
+  "version": "1.0.0",
+  "description": "Telegram Mini App for All Mention Bot",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  }
+}
