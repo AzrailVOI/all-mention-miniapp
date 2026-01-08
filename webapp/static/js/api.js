@@ -17,8 +17,20 @@ async function loadChats() {
         }
         
         // Получаем данные пользователя из Telegram WebApp
-        const initData = tg.initData;
+        // initData может быть пустым при разработке или прямом открытии в браузере
+        const initData = tg.initData || '';
         const user = tg.initDataUnsafe?.user;
+        const userId = user?.id;
+        
+        // Проверяем, что у нас есть хотя бы user_id
+        if (!userId) {
+            console.warn('[API] User ID не найден, возможно страница открыта не через Telegram WebApp');
+            // Показываем понятное сообщение пользователю
+            if (window.showError) {
+                window.showError('Страница должна быть открыта через Telegram Mini App');
+            }
+            return;
+        }
         
         // Отправляем запрос на сервер
         const response = await fetch(API_URL, {
@@ -28,7 +40,7 @@ async function loadChats() {
             },
             body: JSON.stringify({
                 init_data: initData,
-                user_id: user?.id
+                user_id: userId
             })
         });
         

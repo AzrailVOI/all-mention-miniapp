@@ -1,11 +1,15 @@
 // Главный файл инициализации
 
 // Telegram WebApp API
-const tg = window.Telegram.WebApp;
+const tg = window.Telegram?.WebApp;
 
-// Инициализация WebApp
-tg.ready();
-tg.expand();
+// Инициализация WebApp (только если доступен)
+if (tg) {
+    tg.ready();
+    tg.expand();
+} else {
+    console.warn('[App] Telegram WebApp не доступен, возможно страница открыта не через Telegram');
+}
 
 // Инициализация
 document.addEventListener('DOMContentLoaded', async () => {
@@ -15,14 +19,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     // На главной странице скрываем кнопку назад (если она есть)
-    if (tg.BackButton) {
+    if (tg && tg.BackButton) {
         tg.BackButton.hide();
     }
     
     // Обработка нативной кнопки "назад" на главной странице
     window.addEventListener('popstate', (event) => {
         // На главной странице при нажатии назад закрываем миниапп
-        if (window.location.pathname === '/' || window.location.pathname === '') {
+        if (tg && (window.location.pathname === '/' || window.location.pathname === '')) {
             tg.close();
         }
     });
