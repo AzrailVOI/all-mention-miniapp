@@ -82,12 +82,12 @@ def get_chats():
             logger.warning(f"[API] Невалидные данные от пользователя {user_id}")
             print(f"[API] Невалидные данные от пользователя {user_id}")
         
+        # Создаем бота
         bot = Bot(token=Config.TOKEN)
         from bot.services.chat_service import ChatService
-        chat_service = ChatService(bot)
         
-        # Получаем все чаты из Telegram API через getUpdates
-        # Извлекаем уникальные chat_id из последних обновлений
+        # НЕ используем getUpdates, так как он конфликтует с polling в основном потоке
+        # Используем только хранилище чатов, которое заполняется при событиях
         all_chat_ids = set()
         filtered_chats = []
         skipped_not_admin = 0
@@ -98,35 +98,12 @@ def get_chats():
             nonlocal all_chat_ids, filtered_chats, skipped_not_admin, skipped_not_creator, skipped_not_group
             
             try:
-                # Пробуем получить обновления с offset=0 для получения всех доступных обновлений
-                # Но это может не сработать, если обновления уже были обработаны
-                try:
-                    updates = await bot.get_updates(offset=0, limit=100, timeout=1)
-                    logger.info(f"[API] Получено {len(updates)} обновлений из Telegram (offset=0)")
-                    print(f"[API] Получено {len(updates)} обновлений из Telegram (offset=0)")
-                except:
-                    # Если не получилось, пробуем без offset
-                    updates = await bot.get_updates(limit=100, timeout=1)
-                    logger.info(f"[API] Получено {len(updates)} обновлений из Telegram (без offset)")
-                    print(f"[API] Получено {len(updates)} обновлений из Telegram (без offset)")
+                # Инициализируем бота перед использованием
+                await bot.initialize()
+                chat_service = ChatService(bot)
                 
-                # Извлекаем уникальные chat_id из обновлений
-                for update in updates:
-                    if update.message and update.message.chat:
-                        all_chat_ids.add(update.message.chat.id)
-                    if update.channel_post and update.channel_post.chat:
-                        all_chat_ids.add(update.channel_post.chat.id)
-                    if update.edited_message and update.edited_message.chat:
-                        all_chat_ids.add(update.edited_message.chat.id)
-                    if update.chat_member and update.chat_member.chat:
-                        all_chat_ids.add(update.chat_member.chat.id)
-                    if update.my_chat_member and update.my_chat_member.chat:
-                        all_chat_ids.add(update.my_chat_member.chat.id)
-                
-                logger.info(f"[API] Найдено {len(all_chat_ids)} уникальных чатов в обновлениях")
-                print(f"[API] Найдено {len(all_chat_ids)} уникальных чатов в обновлениях")
-                
-                # Также добавляем чаты из хранилища (это основной источник)
+                # Получаем чаты только из хранилища
+                # getUpdates нельзя использовать параллельно с polling
                 stored_chats = chat_storage.get_all_chats()
                 logger.info(f"[API] Чатов в хранилище: {len(stored_chats)}")
                 print(f"[API] Чатов в хранилище: {len(stored_chats)}")
@@ -134,17 +111,17 @@ def get_chats():
                 for stored_chat in stored_chats:
                     all_chat_ids.add(stored_chat['id'])
                 
-                logger.info(f"[API] Всего чатов для проверки (обновления + хранилище): {len(all_chat_ids)}")
-                print(f"[API] Всего чатов для проверки (обновления + хранилище): {len(all_chat_ids)}")
+                logger.info(f"[API] Всего чатов для проверки: {len(all_chat_ids)}")
+                print(f"[API] Всего чатов для проверки: {len(all_chat_ids)}")
                 
                 # Если нет чатов, выводим предупреждение
                 if len(all_chat_ids) == 0:
-                    logger.warning(f"[API] ВНИМАНИЕ: Не найдено чатов ни в обновлениях, ни в хранилище!")
+                    logger.warning(f"[API] ВНИМАНИЕ: Не найдено чатов в хранилище!")
                     logger.warning(f"[API] Чаты будут появляться автоматически при:")
                     logger.warning(f"[API] 1. Получении сообщений в группах")
                     logger.warning(f"[API] 2. Добавлении бота в группы (событие my_chat_member)")
                     logger.warning(f"[API] 3. Использовании команды /register в группе")
-                    print(f"[API] ВНИМАНИЕ: Не найдено чатов ни в обновлениях, ни в хранилище!")
+                    print(f"[API] ВНИМАНИЕ: Не найдено чатов в хранилище!")
                     print(f"[API] Чаты будут появляться автоматически при получении сообщений или событий")
                 
                 # Проверяем каждый чат
@@ -223,6 +200,12 @@ def get_chats():
         
         loop.run_until_complete(get_chats_from_telegram())
         
+        # Закрываем бота после использования
+        try:
+            loop.run_until_complete(bot.shutdown())
+        except:
+            pass
+        
         logger.info(f"[API] Результат фильтрации: {len(filtered_chats)} чатов")
         logger.info(f"[API] Пропущено (не группа): {skipped_not_group}, (бот не админ): {skipped_not_admin}, (пользователь не создатель): {skipped_not_creator}")
         print(f"[API] Результат фильтрации: {len(filtered_chats)} чатов")
@@ -300,6 +283,8 @@ def get_chat_members(chat_id):
         
         # Проверяем права пользователя и бота
         async def check_and_get_members():
+            # Инициализируем бота перед использованием
+            await bot.initialize()
             # Проверяем, является ли пользователь создателем
             is_user_creator = await chat_service.is_user_creator(chat_id, user_id)
             logger.info(f"[API] Чат {chat_id}: пользователь {user_id} создатель = {is_user_creator}")
@@ -330,6 +315,12 @@ def get_chat_members(chat_id):
             asyncio.set_event_loop(loop)
         
         members, error = loop.run_until_complete(check_and_get_members())
+        
+        # Закрываем бота после использования
+        try:
+            loop.run_until_complete(bot.shutdown())
+        except:
+            pass
         
         if error:
             logger.warning(f"[API] GET /api/chats/{chat_id}/members - ошибка: {error}")
