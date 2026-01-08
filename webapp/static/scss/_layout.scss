@@ -32,6 +32,8 @@
 
 .chats-section {
   @include glass-panel($space-lg);
+  background: var(--color-bg-elevated);
+  border: none;
   margin-top: $space-md;
 }
 

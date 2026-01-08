@@ -51,8 +51,15 @@ $space-xl: 24px;
 $space-2xl: 32px;
 
 // Типографика
-$font-family-base: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-  "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+// Темная тема - более строгий, геометричный шрифт
+$font-family-dark: "Inter", "SF Pro Display", system-ui, -apple-system, 
+  BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+// Светлая тема - более читаемый шрифт
+$font-family-light: "Inter", "SF Pro Text", system-ui, -apple-system,
+  BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+// Базовый шрифт (для SCSS переменных, будет переопределен через CSS)
+$font-family-base: $font-family-dark;
+
 $font-size-xs: 11px;
 $font-size-sm: 13px;
 $font-size-md: 15px;

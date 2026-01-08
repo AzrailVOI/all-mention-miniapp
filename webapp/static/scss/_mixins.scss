@@ -1,7 +1,7 @@
 @import "variables";
 
 @mixin glass-panel($padding: $space-lg) {
-  background: var(--color-bg-soft);
+  background: var(--color-bg-elevated);
   border-radius: 0;
   border: none;
   box-shadow: $shadow-subtle;

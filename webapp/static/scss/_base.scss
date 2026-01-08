@@ -25,6 +25,7 @@ body {
   --color-accent: #{$color-accent-dark};
   --color-hover: #{$color-hover-dark};
   --color-border: #{$color-accent-dark};
+  --font-family: #{$font-family-dark};
 }
 
 body.theme-light {
@@ -37,10 +38,11 @@ body.theme-light {
   --color-accent: #{$color-accent-light};
   --color-hover: #{$color-hover-light};
   --color-border: #{$color-accent-light};
+  --font-family: #{$font-family-light};
 }
 
 body {
-  font-family: $font-family-base;
+  font-family: var(--font-family);
   background: var(--color-bg);
   color: var(--color-text);
   min-height: 100vh;
@@ -48,7 +50,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: stretch;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, font-family 0.2s ease;
 }
 
 .container {
