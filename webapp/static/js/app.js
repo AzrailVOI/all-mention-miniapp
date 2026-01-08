@@ -5,6 +5,12 @@ const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
 
+// На главной странице скрываем кнопку закрыть (она не нужна)
+if (tg.close) {
+    // На главной странице можно закрыть миниапп
+    // Но кнопка закрыть управляется автоматически Telegram
+}
+
 // Элементы DOM
 const statsContainer = document.querySelector('.stats');
 const chatsContainer = document.querySelector('.chat-list');
@@ -17,6 +23,20 @@ const API_URL = '/api/chats';
 document.addEventListener('DOMContentLoaded', async () => {
     // Инициализируем иконки Lucide
     lucide.createIcons();
+    
+    // На главной странице скрываем кнопку назад (если она есть)
+    if (tg.BackButton) {
+        tg.BackButton.hide();
+    }
+    
+    // Обработка нативной кнопки "назад" на главной странице
+    // Если пользователь нажал назад на главной странице, закрываем миниапп
+    window.addEventListener('popstate', (event) => {
+        // На главной странице при нажатии назад закрываем миниапп
+        if (window.location.pathname === '/' || window.location.pathname === '') {
+            tg.close();
+        }
+    });
     
     await loadChats();
     
@@ -34,16 +54,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         searchInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 performSearch();
-            }
-        });
-    }
-    
-    // Закрытие модального окна при клике вне его
-    const modal = document.getElementById('membersModal');
-    if (modal) {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                closeMembersModal();
             }
         });
     }
@@ -191,6 +201,8 @@ function getChatTypeLabel(type) {
 function openChat(chatId, chatTitle) {
     // Переходим на отдельную страницу участников
     const encodedTitle = encodeURIComponent(chatTitle || 'Участники чата');
+    // Используем pushState для правильной работы кнопки назад
+    window.history.pushState({ page: 'members', chatId, chatTitle }, '', `/members?chat_id=${chatId}&title=${encodedTitle}`);
     window.location.href = `/members?chat_id=${chatId}&title=${encodedTitle}`;
 }
 

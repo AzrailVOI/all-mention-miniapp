@@ -472,6 +472,62 @@ body {
     flex-shrink: 0;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: white;
+    position: relative;
+}
+
+.member-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.member-avatar video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.member-avatar-text {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.member-profile-btn {
+    background: none;
+    border: 1px solid #1a1a1a;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    padding: 0;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.member-profile-btn i {
+    width: 16px;
+    height: 16px;
+    color: #1a1a1a;
+}
+
+.member-profile-btn:hover {
+    background: #1a1a1a;
+    color: white;
+}
+
+.member-profile-btn:hover i {
+    color: white;
 }
 
 .member-info {

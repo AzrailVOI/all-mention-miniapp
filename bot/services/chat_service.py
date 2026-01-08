@@ -121,6 +121,21 @@ class ChatService:
             for admin in admins:
                 user = admin.user
                 if user.id not in seen_user_ids:
+                    # Получаем фото профиля пользователя
+                    profile_photo_url = None
+                    try:
+                        photos = await self.bot.get_user_profile_photos(user.id, limit=1)
+                        if photos and photos.total_count > 0 and photos.photos:
+                            # Берем самое большое фото (последний элемент в массиве размеров)
+                            photo = photos.photos[0][-1]  # Последний элемент - самое большое фото
+                            file = await self.bot.get_file(photo.file_id)
+                            # Формируем URL для доступа к файлу
+                            profile_photo_url = file.file_path
+                            logger.debug(f"[ChatService] Получено фото профиля для пользователя {user.id}: {profile_photo_url}")
+                    except Exception as e:
+                        logger.debug(f"[ChatService] Не удалось получить фото профиля для пользователя {user.id}: {e}")
+                        pass
+                    
                     member_info = {
                         'id': user.id,
                         'first_name': user.first_name or '',
@@ -128,6 +143,7 @@ class ChatService:
                         'username': user.username or '',
                         'is_bot': user.is_bot,
                         'status': admin.status,  # creator, administrator, member
+                        'profile_photo_url': profile_photo_url,  # URL фото профиля
                         'can_be_edited': getattr(admin, 'can_be_edited', False),
                         'can_manage_chat': getattr(admin, 'can_manage_chat', False),
                         'can_delete_messages': getattr(admin, 'can_delete_messages', False),

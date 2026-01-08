@@ -307,7 +307,7 @@ def get_chat_members(chat_id):
             is_user_creator = await chat_service.is_user_creator(chat_id, user_id)
             logger.info(f"[API] Чат {chat_id}: пользователь {user_id} создатель = {is_user_creator}")
             print(f"[API] Чат {chat_id}: пользователь {user_id} создатель = {is_user_creator}")
-            
+        
             if not is_user_creator:
                 return None, "Пользователь не является создателем группы"
             
@@ -323,6 +323,14 @@ def get_chat_members(chat_id):
             members = await chat_service.get_chat_members_list(chat_id)
             logger.info(f"[API] Получено {len(members)} участников для чата {chat_id}")
             print(f"[API] Получено {len(members)} участников для чата {chat_id}")
+            
+            # Формируем полные URL для фото профиля
+            for member in members:
+                if member.get('profile_photo_url'):
+                    # Формируем полный URL для доступа к файлу через Telegram Bot API
+                    file_path = member['profile_photo_url']
+                    member['profile_photo_url'] = f"https://api.telegram.org/file/bot{Config.TOKEN}/{file_path}"
+            
             return members, None
         
         # Запускаем async функцию
