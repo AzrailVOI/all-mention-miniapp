@@ -34,14 +34,19 @@ class MessageHandler:
         
         # Если нет текста, просто выходим (но чат уже зарегистрирован)
         if not update.message.text:
+            logger.debug(f"[MessageHandler] Сообщение без текста в чате {chat_id}, пропускаем")
             return
         
         message_text = update.message.text
+        logger.debug(f"[MessageHandler] Получено текстовое сообщение в чате {chat_id}: {message_text[:50]}...")
         
         # Проверяем наличие триггера упоминания
         mention_service = MentionService(context.bot)
         if not mention_service.has_mention_trigger(message_text):
+            logger.debug(f"[MessageHandler] Триггер упоминания не найден в сообщении")
             return
+        
+        logger.info(f"[MessageHandler] Найден триггер упоминания в чате {chat_id}, обрабатываем...")
         
         # Проверяем, что это группа или супергруппа
         if chat.type not in ["group", "supergroup"]:

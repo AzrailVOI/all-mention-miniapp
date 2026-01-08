@@ -36,21 +36,6 @@
             <div class="chat-list"></div>
         </div>
         
-        <!-- Модальное окно для списка участников -->
-        <div id="membersModal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 id="modalTitle">Участники чата</h2>
-                    <button class="modal-close" onclick="closeMembersModal()">
-                        <i data-lucide="x"></i>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="loading" id="membersLoading" style="display: none;">Загрузка участников...</div>
-                    <div id="membersList" class="members-list"></div>
-                </div>
-            </div>
-        </div>
     </div>
     
     <script src="{{ url_for('static', filename='js/app.js') }}?v={{ version }}"></script>

@@ -47,6 +47,14 @@ def index():
     return render_template('index.html', version=APP_VERSION)
 
 
+@app.route('/members')
+def members_page():
+    """Страница участников чата"""
+    logger.info(f"[API] GET /members - запрос страницы участников")
+    print(f"[API] GET /members - запрос страницы участников")
+    return render_template('members.html', version=APP_VERSION)
+
+
 @app.after_request
 def add_no_cache_headers(response):
     """Добавляет заголовки для предотвращения кэширования"""

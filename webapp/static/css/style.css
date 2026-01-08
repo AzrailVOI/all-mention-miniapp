@@ -23,19 +23,51 @@ body {
     margin-bottom: 30px;
     padding-bottom: 20px;
     border-bottom: 2px solid #1a1a1a;
+    display: flex;
+    align-items: center;
+    gap: 16px;
 }
 
 .header h1 {
     font-size: 32px;
-    margin-bottom: 8px;
+    margin: 0;
     font-weight: 700;
     letter-spacing: -0.5px;
+    flex: 1;
 }
 
 .header p {
     font-size: 14px;
     color: #666;
     font-weight: 400;
+}
+
+.back-btn {
+    background: none;
+    border: 1px solid #1a1a1a;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    padding: 0;
+}
+
+.back-btn i {
+    width: 20px;
+    height: 20px;
+    color: #1a1a1a;
+}
+
+.back-btn:hover {
+    background: #1a1a1a;
+    color: white;
+}
+
+.back-btn:hover i {
+    color: white;
 }
 
 .stats {
