@@ -129,24 +129,31 @@ function renderMembers(members) {
         const displayName = name || member.username || `User ${member.id}`;
         const initials = (member.first_name?.[0] || member.username?.[0] || 'U').toUpperCase();
         
+        console.log(`[Frontend] Обработка участника ${member.id} (${displayName}): profile_photo_url = ${member.profile_photo_url || 'отсутствует'}`);
+        
         // Формируем аватарку
         let avatarHtml = '';
         if (member.profile_photo_url) {
             // Проверяем тип файла по расширению
             const photoUrl = member.profile_photo_url;
+            console.log(`[Frontend] Участник ${member.id}: есть profile_photo_url = ${photoUrl}`);
+            
             const urlLower = photoUrl.toLowerCase();
             const isVideo = urlLower.includes('.mp4') || urlLower.includes('.mov') || urlLower.includes('video');
             const isGif = urlLower.includes('.gif');
             
             if (isVideo) {
                 // Видео аватарка с автопроигрыванием
+                console.log(`[Frontend] Участник ${member.id}: определяем как видео`);
                 avatarHtml = `<video class="member-avatar-img" autoplay loop muted playsinline><source src="${escapeHtml(photoUrl)}" type="video/mp4"></video>`;
             } else {
                 // Обычное фото или GIF (оба отображаются через img, GIF будет автопроигрываться)
-                avatarHtml = `<img class="member-avatar-img" src="${escapeHtml(photoUrl)}" alt="${escapeHtml(displayName)}" onerror="this.parentElement.innerHTML='<div class=\\'member-avatar-text\\'>${initials}</div>'" />`;
+                console.log(`[Frontend] Участник ${member.id}: определяем как фото/GIF`);
+                avatarHtml = `<img class="member-avatar-img" src="${escapeHtml(photoUrl)}" alt="${escapeHtml(displayName)}" onerror="console.error('[Frontend] Ошибка загрузки фото участника ${member.id}'); this.parentElement.innerHTML='<div class=\\'member-avatar-text\\'>${initials}</div>'" />`;
             }
         } else {
             // Если нет фото, показываем инициалы
+            console.log(`[Frontend] Участник ${member.id}: нет profile_photo_url, показываем инициалы`);
             avatarHtml = `<div class="member-avatar-text">${initials}</div>`;
         }
         

@@ -157,22 +157,29 @@ function renderChats(chats, infoMessage) {
         const chatTitle = escapeHtml(chat.title || 'Без названия');
         const chatInitials = chatTitle.substring(0, 2).toUpperCase();
         
+        console.log(`[Frontend] Обработка чата ${chat.id} (${chatTitle}): photo_url = ${chat.photo_url || 'отсутствует'}`);
+        
         // Формируем аватарку чата
         let avatarHtml = '';
         if (chat.photo_url) {
             const photoUrl = chat.photo_url;
+            console.log(`[Frontend] Чат ${chat.id}: есть photo_url = ${photoUrl}`);
+            
             const urlLower = photoUrl.toLowerCase();
             const isVideo = urlLower.includes('.mp4') || urlLower.includes('.mov') || urlLower.includes('video');
             
             if (isVideo) {
                 // Видео аватарка
+                console.log(`[Frontend] Чат ${chat.id}: определяем как видео`);
                 avatarHtml = `<video class="chat-avatar-img" autoplay loop muted playsinline><source src="${escapeHtml(photoUrl)}" type="video/mp4"></video>`;
             } else {
                 // Обычное фото или GIF
-                avatarHtml = `<img class="chat-avatar-img" src="${escapeHtml(photoUrl)}" alt="${chatTitle}" onerror="this.parentElement.innerHTML='<div class=\\'chat-avatar-text\\'>${chatInitials}</div>'" />`;
+                console.log(`[Frontend] Чат ${chat.id}: определяем как фото/GIF`);
+                avatarHtml = `<img class="chat-avatar-img" src="${escapeHtml(photoUrl)}" alt="${chatTitle}" onerror="console.error('[Frontend] Ошибка загрузки фото чата ${chat.id}'); this.parentElement.innerHTML='<div class=\\'chat-avatar-text\\'>${chatInitials}</div>'" />`;
             }
         } else {
             // Если нет фото, показываем иконку
+            console.log(`[Frontend] Чат ${chat.id}: нет photo_url, показываем иконку`);
             avatarHtml = `<div class="chat-avatar-icon">${getChatIcon(chat.type)}</div>`;
         }
         

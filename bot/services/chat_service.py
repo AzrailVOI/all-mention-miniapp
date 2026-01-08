@@ -124,17 +124,32 @@ class ChatService:
                     # Получаем фото профиля пользователя
                     profile_photo_url = None
                     try:
+                        logger.info(f"[ChatService] Получение фото профиля для пользователя {user.id} ({user.first_name})")
+                        print(f"[ChatService] Получение фото профиля для пользователя {user.id} ({user.first_name})")
+                        
                         photos = await self.bot.get_user_profile_photos(user.id, limit=1)
+                        logger.info(f"[ChatService] Результат get_user_profile_photos для {user.id}: total_count = {photos.total_count if photos else 0}, photos = {photos.photos if photos else None}")
+                        print(f"[ChatService] Результат get_user_profile_photos для {user.id}: total_count = {photos.total_count if photos else 0}, photos = {photos.photos if photos else None}")
+                        
                         if photos and photos.total_count > 0 and photos.photos:
                             # Берем самое большое фото (последний элемент в массиве размеров)
                             photo = photos.photos[0][-1]  # Последний элемент - самое большое фото
+                            logger.info(f"[ChatService] Получение файла фото для пользователя {user.id}: file_id = {photo.file_id}")
+                            print(f"[ChatService] Получение файла фото для пользователя {user.id}: file_id = {photo.file_id}")
+                            
                             file = await self.bot.get_file(photo.file_id)
                             # Формируем URL для доступа к файлу
                             profile_photo_url = file.file_path
-                            logger.debug(f"[ChatService] Получено фото профиля для пользователя {user.id}: {profile_photo_url}")
+                            logger.info(f"[ChatService] Получено фото профиля для пользователя {user.id}: {profile_photo_url}")
+                            print(f"[ChatService] Получено фото профиля для пользователя {user.id}: {profile_photo_url}")
+                        else:
+                            logger.info(f"[ChatService] Пользователь {user.id} не имеет фото профиля (total_count = {photos.total_count if photos else 0})")
+                            print(f"[ChatService] Пользователь {user.id} не имеет фото профиля (total_count = {photos.total_count if photos else 0})")
                     except Exception as e:
-                        logger.debug(f"[ChatService] Не удалось получить фото профиля для пользователя {user.id}: {e}")
-                        pass
+                        logger.error(f"[ChatService] Ошибка при получении фото профиля для пользователя {user.id}: {e}", exc_info=True)
+                        print(f"[ChatService] Ошибка при получении фото профиля для пользователя {user.id}: {e}")
+                        import traceback
+                        traceback.print_exc()
                     
                     member_info = {
                         'id': user.id,

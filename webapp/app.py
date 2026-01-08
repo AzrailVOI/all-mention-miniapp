@@ -172,15 +172,30 @@ def get_chats():
                         # Получаем фото чата (если есть)
                         chat_photo_url = None
                         try:
+                            logger.info(f"[API] Проверка фото чата {chat_id}: hasattr(chat, 'photo') = {hasattr(chat, 'photo')}")
+                            print(f"[API] Проверка фото чата {chat_id}: hasattr(chat, 'photo') = {hasattr(chat, 'photo')}")
+                            
                             if hasattr(chat, 'photo') and chat.photo:
+                                logger.info(f"[API] Чат {chat_id} имеет фото: {chat.photo}")
+                                print(f"[API] Чат {chat_id} имеет фото: {chat.photo}")
+                                
                                 # Получаем самое большое фото
                                 photo = chat.photo.big_file_id
+                                logger.info(f"[API] Получение файла фото чата {chat_id}: file_id = {photo}")
+                                print(f"[API] Получение файла фото чата {chat_id}: file_id = {photo}")
+                                
                                 file = await bot.get_file(photo)
                                 chat_photo_url = file.file_path
-                                logger.debug(f"[API] Получено фото чата {chat_id}: {chat_photo_url}")
+                                logger.info(f"[API] Получено фото чата {chat_id}: {chat_photo_url}")
+                                print(f"[API] Получено фото чата {chat_id}: {chat_photo_url}")
+                            else:
+                                logger.info(f"[API] Чат {chat_id} не имеет фото профиля")
+                                print(f"[API] Чат {chat_id} не имеет фото профиля")
                         except Exception as e:
-                            logger.debug(f"[API] Не удалось получить фото чата {chat_id}: {e}")
-                            pass
+                            logger.error(f"[API] Ошибка при получении фото чата {chat_id}: {e}", exc_info=True)
+                            print(f"[API] Ошибка при получении фото чата {chat_id}: {e}")
+                            import traceback
+                            traceback.print_exc()
                         
                         # Формируем данные чата
                         chat_data = {
@@ -194,9 +209,17 @@ def get_chats():
                         
                         # Формируем полный URL для фото (если есть)
                         if chat_photo_url:
-                            chat_data['photo_url'] = f"https://api.telegram.org/file/bot{Config.TOKEN}/{chat_photo_url}"
+                            full_photo_url = f"https://api.telegram.org/file/bot{Config.TOKEN}/{chat_photo_url}"
+                            chat_data['photo_url'] = full_photo_url
+                            logger.info(f"[API] Чат {chat_id}: полный URL фото = {full_photo_url}")
+                            print(f"[API] Чат {chat_id}: полный URL фото = {full_photo_url}")
+                        else:
+                            logger.info(f"[API] Чат {chat_id}: фото не добавлено в данные")
+                            print(f"[API] Чат {chat_id}: фото не добавлено в данные")
                         
                         filtered_chats.append(chat_data)
+                        logger.info(f"[API] Чат {chat_id} добавлен в результат с photo_url = {chat_data.get('photo_url', 'None')}")
+                        print(f"[API] Чат {chat_id} добавлен в результат с photo_url = {chat_data.get('photo_url', 'None')}")
                         
                         # Сохраняем в хранилище
                         chat_storage.register_chat(chat)
@@ -343,11 +366,20 @@ def get_chat_members(chat_id):
             print(f"[API] Получено {len(members)} участников для чата {chat_id}")
             
             # Формируем полные URL для фото профиля
+            logger.info(f"[API] Формирование URL для {len(members)} участников")
+            print(f"[API] Формирование URL для {len(members)} участников")
+            
             for member in members:
                 if member.get('profile_photo_url'):
                     # Формируем полный URL для доступа к файлу через Telegram Bot API
                     file_path = member['profile_photo_url']
-                    member['profile_photo_url'] = f"https://api.telegram.org/file/bot{Config.TOKEN}/{file_path}"
+                    full_url = f"https://api.telegram.org/file/bot{Config.TOKEN}/{file_path}"
+                    member['profile_photo_url'] = full_url
+                    logger.info(f"[API] Участник {member.get('id')} ({member.get('first_name')}): фото URL = {full_url}")
+                    print(f"[API] Участник {member.get('id')} ({member.get('first_name')}): фото URL = {full_url}")
+                else:
+                    logger.info(f"[API] Участник {member.get('id')} ({member.get('first_name')}): нет фото профиля")
+                    print(f"[API] Участник {member.get('id')} ({member.get('first_name')}): нет фото профиля")
             
             return members, None
         
