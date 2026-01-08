@@ -27,11 +27,6 @@ try:
 except ImportError:  # pragma: no cover - опциональная зависимость
     sass = None
 
-try:
-    from webapp.utils.ts_compiler import compile_typescript
-except ImportError:  # pragma: no cover - опциональная зависимость
-    compile_typescript = None
-
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
@@ -66,25 +61,7 @@ def _compile_scss() -> None:
         logger.error(f"Ошибка компиляции SCSS: {e}", exc_info=True)
 
 
-def _compile_typescript() -> None:
-    """
-    Компилирует TypeScript в JavaScript при старте приложения.
-    Если компилятор недоступен, просто логируем предупреждение.
-    """
-    if compile_typescript is None:
-        logger.warning("TypeScript не скомпилирован: модуль компиляции недоступен")
-        return
-
-    try:
-        success = compile_typescript()
-        if not success:
-            logger.warning("TypeScript не скомпилирован: проверьте установку TypeScript (npm install -g typescript)")
-    except Exception as e:  # pragma: no cover - защитный код
-        logger.error(f"Ошибка компиляции TypeScript: {e}", exc_info=True)
-
-
 _compile_scss()
-_compile_typescript()
 
 # Метрики производительности
 _metrics = {
