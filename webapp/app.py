@@ -266,10 +266,20 @@ def get_chats():
         }), 500
 
 
-@app.route('/api/chats/<int:chat_id>/members', methods=['POST'])
+@app.route('/api/chats/<chat_id>/members', methods=['POST'])
 def get_chat_members(chat_id):
     """API endpoint для получения списка участников чата"""
     import asyncio
+    # Преобразуем chat_id в int (может быть отрицательным для супергрупп)
+    try:
+        chat_id = int(chat_id)
+    except (ValueError, TypeError):
+        logger.warning(f"[API] GET /api/chats/{chat_id}/members - неверный формат chat_id")
+        print(f"[API] GET /api/chats/{chat_id}/members - неверный формат chat_id")
+        return jsonify({
+            'success': False,
+            'error': 'Неверный формат ID чата'
+        }), 400
     try:
         data = request.get_json()
         user_id = data.get('user_id')
