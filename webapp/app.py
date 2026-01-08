@@ -15,6 +15,10 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 app.config['SECRET_KEY'] = Config.TOKEN  # Используем токен бота как секретный ключ
 
+# Версия для cache busting
+import time
+APP_VERSION = str(int(time.time()))  # Используем timestamp как версию
+
 
 def validate_telegram_webapp_data(init_data: str) -> bool:
     """
@@ -40,7 +44,17 @@ def validate_telegram_webapp_data(init_data: str) -> bool:
 @app.route('/')
 def index():
     """Главная страница Mini App"""
-    return render_template('index.html')
+    return render_template('index.html', version=APP_VERSION)
+
+
+@app.after_request
+def add_no_cache_headers(response):
+    """Добавляет заголовки для предотвращения кэширования"""
+    if request.endpoint == 'static' or request.endpoint == 'index':
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+    return response
 
 
 @app.route('/api/chats', methods=['POST'])
