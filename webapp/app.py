@@ -169,14 +169,32 @@ def get_chats():
                             print(f"[API] Чат {chat_id} пропущен: пользователь {user_id} не является создателем")
                             continue
                         
+                        # Получаем фото чата (если есть)
+                        chat_photo_url = None
+                        try:
+                            if hasattr(chat, 'photo') and chat.photo:
+                                # Получаем самое большое фото
+                                photo = chat.photo.big_file_id
+                                file = await bot.get_file(photo)
+                                chat_photo_url = file.file_path
+                                logger.debug(f"[API] Получено фото чата {chat_id}: {chat_photo_url}")
+                        except Exception as e:
+                            logger.debug(f"[API] Не удалось получить фото чата {chat_id}: {e}")
+                            pass
+                        
                         # Формируем данные чата
                         chat_data = {
                             'id': chat.id,
                             'title': chat.title or 'Без названия',
                             'type': chat.type,
                             'username': getattr(chat, 'username', None),
-                            'members_count': getattr(chat, 'members_count', None)
+                            'members_count': getattr(chat, 'members_count', None),
+                            'photo_url': chat_photo_url
                         }
+                        
+                        # Формируем полный URL для фото (если есть)
+                        if chat_photo_url:
+                            chat_data['photo_url'] = f"https://api.telegram.org/file/bot{Config.TOKEN}/{chat_photo_url}"
                         
                         filtered_chats.append(chat_data)
                         

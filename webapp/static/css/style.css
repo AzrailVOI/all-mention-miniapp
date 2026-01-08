@@ -156,7 +156,8 @@ body {
     border-color: #1a1a1a;
 }
 
-.chat-icon {
+.chat-icon,
+.chat-avatar {
     width: 48px;
     height: 48px;
     border: 1px solid #1a1a1a;
@@ -166,11 +167,54 @@ body {
     color: #1a1a1a;
     margin-right: 16px;
     flex-shrink: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    background: white;
+    position: relative;
 }
 
 .chat-icon i {
     width: 24px;
     height: 24px;
+}
+
+.chat-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.chat-avatar video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.chat-avatar-icon {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chat-avatar-icon i {
+    width: 24px;
+    height: 24px;
+}
+
+.chat-avatar-text {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .chat-arrow {
@@ -588,7 +632,8 @@ body {
         text-align: center;
     }
     
-    .chat-icon {
+    .chat-icon,
+    .chat-avatar {
         margin-right: 0;
         margin-bottom: 10px;
     }
