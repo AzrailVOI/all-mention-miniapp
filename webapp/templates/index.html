@@ -19,6 +19,9 @@
                 <p>Список чатов, где добавлен бот</p>
             </div>
             <div style="display: flex; gap: 10px; align-items: center;">
+                <button class="filters-btn" type="button" title="Фильтры" onclick="openFiltersModal()">
+                    <i data-lucide="filter"></i>
+                </button>
                 <button class="theme-toggle" type="button" title="Переключить тему" onclick="toggleTheme()">
                     <i data-lucide="sun" id="theme-icon"></i>
                 </button>
@@ -38,33 +41,6 @@
                 <span>Список чатов</span>
             </div>
             
-            <div class="filters-container">
-                <div class="search-container">
-                    <input type="text" id="searchInput" class="search-input" placeholder="Поиск чатов...">
-                    <button class="search-btn" onclick="performSearch()">
-                        <i data-lucide="search"></i>
-                    </button>
-                </div>
-                
-                <div class="filter-controls">
-                    <select id="filterType" class="filter-select" onchange="applyFilters()">
-                        <option value="all">Все чаты</option>
-                        <option value="group">Группы</option>
-                        <option value="supergroup">Супергруппы</option>
-                    </select>
-                    
-                    <select id="sortBy" class="filter-select" onchange="applyFilters()">
-                        <option value="title">По названию</option>
-                        <option value="members_count">По участникам</option>
-                        <option value="type">По типу</option>
-                    </select>
-                    
-                    <select id="sortOrder" class="filter-select" onchange="applyFilters()">
-                        <option value="asc">По возрастанию</option>
-                        <option value="desc">По убыванию</option>
-                    </select>
-                </div>
-            </div>
             
             <div class="loading" style="display: none;">
                 <div class="loading-spinner"></div>
@@ -73,6 +49,60 @@
             <div class="chat-list"></div>
         </div>
         
+    </div>
+    
+    <!-- Модальное окно фильтров -->
+    <div id="filtersModal" class="modal-overlay" onclick="closeFiltersModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2>Фильтры и поиск</h2>
+                <button class="modal-close-btn" onclick="closeFiltersModal()" title="Закрыть">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="filters-container">
+                    <div class="search-container">
+                        <input type="text" id="searchInput" class="search-input" placeholder="Поиск чатов...">
+                        <button class="search-btn" onclick="performSearch()">
+                            <i data-lucide="search"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="filter-controls">
+                        <div class="filter-group">
+                            <label class="filter-label">Тип чата</label>
+                            <select id="filterType" class="filter-select" onchange="applyFilters()">
+                                <option value="all">Все чаты</option>
+                                <option value="group">Группы</option>
+                                <option value="supergroup">Супергруппы</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Сортировка</label>
+                            <select id="sortBy" class="filter-select" onchange="applyFilters()">
+                                <option value="title">По названию</option>
+                                <option value="members_count">По участникам</option>
+                                <option value="type">По типу</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Порядок</label>
+                            <select id="sortOrder" class="filter-select" onchange="applyFilters()">
+                                <option value="asc">По возрастанию</option>
+                                <option value="desc">По убыванию</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn-secondary" onclick="resetFilters()">Сбросить</button>
+                <button class="modal-btn-primary" onclick="closeFiltersModal()">Применить</button>
+            </div>
+        </div>
     </div>
     
     <script src="{{ url_for('static', filename='js/app.js') }}?v={{ version }}"></script>
