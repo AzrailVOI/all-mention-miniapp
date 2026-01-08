@@ -46,10 +46,15 @@ def _compile_scss() -> None:
         import pathlib
 
         base_dir = pathlib.Path(__file__).resolve().parent
-        scss_path = base_dir / "static" / "scss" / "style.scss"
+        scss_dir = base_dir / "static" / "scss"
+        scss_path = scss_dir / "style.scss"
         css_path = base_dir / "static" / "css" / "style.css"
 
-        css = sass.compile(filename=str(scss_path))
+        # libsass требует include_paths для правильной работы @import
+        css = sass.compile(
+            filename=str(scss_path),
+            include_paths=[str(scss_dir)]
+        )
         css_path.write_text(css, encoding="utf-8")
         logger.info(f"SCSS успешно скомпилирован в {css_path}")
     except Exception as e:  # pragma: no cover - защитный код
@@ -340,6 +345,7 @@ def get_chats():
                 # Функция-процессор для обработки одного чата
                 async def process_chat(chat_id: int):
                     """Обрабатывает один чат и возвращает данные или None"""
+                    nonlocal skipped_not_group, skipped_not_admin, skipped_not_creator
                     try:
                         # Получаем информацию о чате через TelegramClient (с встроенным retry)
                         chat = await telegram_client.get_chat(chat_id)
