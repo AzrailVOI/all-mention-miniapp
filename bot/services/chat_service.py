@@ -85,16 +85,34 @@ class ChatService:
             
         Returns:
             True, если пользователь является создателем чата,
-            False в противном случае или при ошибке
-        """
-        try:
-            logger.info(f"[ChatService] Проверка прав создателя: чат {chat_id}, пользователь {user_id}")
+            False в противном случае
             
+        Raises:
+            TelegramError: При ошибках Telegram API (для обработки через retry)
+        """
+        from telegram.error import TimedOut, NetworkError, RetryAfter, Conflict
+        
+        logger.info(f"[ChatService] Проверка прав создателя: чат {chat_id}, пользователь {user_id}")
+        
+        try:
             # Получаем список администраторов
             admins = await self.bot.get_chat_administrators(chat_id)
             logger.info(f"[ChatService] Получено {len(admins)} администраторов для чата {chat_id}")
-            
-            # Ищем пользователя среди администраторов
+        except (TimedOut, NetworkError, RetryAfter, Conflict) as e:
+            # Retryable ошибки - пробрасываем для обработки через retry
+            logger.warning(f"[ChatService] Retryable ошибка при проверке прав создателя для чата {chat_id}, пользователя {user_id}: {e}")
+            raise
+        except TelegramError as e:
+            # Не retryable ошибки Telegram API - возвращаем False
+            logger.error(f"[ChatService] Ошибка Telegram API при проверке прав создателя для чата {chat_id}, пользователя {user_id}: {e}")
+            return False
+        except Exception as e:
+            # Неожиданные ошибки - логируем и возвращаем False
+            logger.error(f"[ChatService] Неожиданная ошибка при проверке прав создателя для чата {chat_id}, пользователя {user_id}: {e}", exc_info=True)
+            return False
+        
+        # Ищем пользователя среди администраторов
+        try:
             for admin in admins:
                 admin_user_id = admin.user.id
                 admin_status = admin.status
@@ -107,8 +125,8 @@ class ChatService:
             
             logger.warning(f"[ChatService] Пользователь {user_id} не найден среди администраторов чата {chat_id}")
             return False
-        except TelegramError as e:
-            logger.error(f"[ChatService] Ошибка при проверке прав создателя для чата {chat_id}, пользователя {user_id}: {e}")
+        except Exception as e:
+            logger.error(f"[ChatService] Ошибка при обработке списка администраторов: {e}", exc_info=True)
             return False
     
     async def get_chat_members_list(self, chat_id: int) -> List[dict]:

@@ -647,16 +647,42 @@ def get_chat_members(chat_id: str):
                 # Инициализируем клиент перед использованием
                 await telegram_client.initialize()
                 
-                # Проверяем, является ли пользователь создателем
-                is_user_creator = await chat_service.is_user_creator(chat_id_int, user_id)
-                logger.debug(f"[API] Чат {chat_id_int}: пользователь {user_id} создатель = {is_user_creator}")
+                # Retry конфигурация для операций с Telegram API
+                retry_config = RetryConfig(
+                    max_attempts=3,
+                    initial_delay=1.0,
+                    max_delay=10.0
+                )
+                
+                # Проверяем, является ли пользователь создателем (с retry)
+                try:
+                    is_user_creator = await retry_async(
+                        chat_service.is_user_creator,
+                        chat_id_int,
+                        user_id,
+                        config=retry_config
+                    )
+                    logger.debug(f"[API] Чат {chat_id_int}: пользователь {user_id} создатель = {is_user_creator}")
+                except Exception as e:
+                    logger.error(f"[API] Ошибка при проверке прав создателя (после retry): {e}", exc_info=True)
+                    # При ошибке после retry возвращаем False
+                    is_user_creator = False
                 
                 if not is_user_creator:
                     return None, "Пользователь не является создателем группы"
                 
-                # Проверяем, является ли бот администратором
-                is_bot_admin = await chat_service.is_bot_admin(chat_id_int)
-                logger.debug(f"[API] Чат {chat_id_int}: бот админ = {is_bot_admin}")
+                # Проверяем, является ли бот администратором (с retry)
+                try:
+                    is_bot_admin = await retry_async(
+                        chat_service.is_bot_admin,
+                        chat_id_int,
+                        config=retry_config
+                    )
+                    logger.debug(f"[API] Чат {chat_id_int}: бот админ = {is_bot_admin}")
+                except Exception as e:
+                    logger.error(f"[API] Ошибка при проверке прав бота (после retry): {e}", exc_info=True)
+                    # При ошибке после retry возвращаем False
+                    is_bot_admin = False
                 
                 if not is_bot_admin:
                     return None, "Бот не является администратором группы"
