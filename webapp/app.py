@@ -246,7 +246,7 @@ def handle_validation_error(e: ValidationError):
     return jsonify({
         'success': False,
         'error': 'Ошибка валидации данных',
-        'details': e.errors()
+        'details': [{'field': error.get('loc', []), 'message': str(error.get('msg', '')), 'type': error.get('type', '')} for error in e.errors()]
     }), 400
 
 
@@ -295,10 +295,18 @@ def get_chats():
             per_page = validated_data.per_page
         except ValidationError as e:
             logger.warning(f"[API] POST /api/chats - ошибка валидации: {e}")
+            # Преобразуем ошибки валидации в сериализуемый формат
+            error_details = []
+            for error in e.errors():
+                error_details.append({
+                    'field': error.get('loc', []),
+                    'message': str(error.get('msg', '')),
+                    'type': error.get('type', '')
+                })
             return jsonify({
                 'success': False,
                 'error': 'Невалидные данные запроса',
-                'details': e.errors()
+                'details': error_details
             }), 400
         
         # Дополнительная валидация WebApp данных
@@ -564,9 +572,12 @@ def get_chats():
         
     except Exception as e:
         logger.error(f"[API] Ошибка при получении списка чатов: {e}", exc_info=True)
+        # Убеждаемся, что ошибка сериализуема
+        error_message = str(e) if e else 'Неизвестная ошибка'
         return jsonify({
             'success': False,
-            'error': 'Не удалось загрузить список чатов'
+            'error': 'Не удалось загрузить список чатов',
+            'details': error_message
         }), 500
 
 
@@ -610,9 +621,11 @@ def delete_chat(chat_id: str):
         })
     except Exception as e:
         logger.error(f"[API] Ошибка при удалении чата {chat_id_int}: {e}", exc_info=True)
+        error_message = str(e) if e else 'Неизвестная ошибка'
         return jsonify({
             'success': False,
-            'error': 'Не удалось удалить чат'
+            'error': 'Не удалось удалить чат',
+            'details': error_message
         }), 500
 
 
@@ -640,10 +653,18 @@ def get_chat_members(chat_id: str):
             user_id = validated_data.user_id
         except ValidationError as e:
             logger.warning(f"[API] POST /api/chats/{chat_id_int}/members - ошибка валидации: {e}")
+            # Преобразуем ошибки валидации в сериализуемый формат
+            error_details = []
+            for error in e.errors():
+                error_details.append({
+                    'field': error.get('loc', []),
+                    'message': str(error.get('msg', '')),
+                    'type': error.get('type', '')
+                })
             return jsonify({
                 'success': False,
                 'error': 'Невалидные данные запроса',
-                'details': e.errors()
+                'details': error_details
             }), 400
         
         logger.info(f"[API] POST /api/chats/{chat_id_int}/members - запрос от пользователя {user_id}")
@@ -775,9 +796,11 @@ def get_chat_members(chat_id: str):
         }), 500
     except Exception as e:
         logger.error(f"[API] Ошибка при получении участников чата {chat_id_int}: {e}", exc_info=True)
+        error_message = str(e) if e else 'Неизвестная ошибка'
         return jsonify({
             'success': False,
-            'error': 'Не удалось загрузить список участников'
+            'error': 'Не удалось загрузить список участников',
+            'details': error_message
         }), 500
 
 
