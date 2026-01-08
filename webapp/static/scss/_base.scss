@@ -16,7 +16,7 @@ body {
 
 body {
   font-family: $font-family-base;
-  background: radial-gradient(circle at top, #12141b 0, $color-bg 42%, #020308 100%);
+  background: $color-bg;
   color: $color-text;
   min-height: 100vh;
   padding: $space-lg;

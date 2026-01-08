@@ -1,31 +1,31 @@
-// Цветовая палитра (минималистичный чёрно-белый футуризм)
-$color-bg: #050608;
-$color-bg-elevated: #0b0e12;
-$color-bg-soft: #10141a;
-$color-border-soft: #1f242c;
-$color-border-strong: #f5f5f5;
-$color-text: #f5f5f5;
-$color-text-muted: #8a8f99;
-$color-text-soft: #6b707a;
+// Цветовая палитра (строго черно-белый линейный футуризм)
+$color-bg: #000000;
+$color-bg-elevated: #0a0a0a;
+$color-bg-soft: #1a1a1a;
+$color-border-soft: #333333;
+$color-border-strong: #ffffff;
+$color-text: #ffffff;
+$color-text-muted: #999999;
+$color-text-soft: #666666;
 $color-accent: #ffffff;
-$color-accent-soft: #c0c4cc;
-$color-danger: #ff4b4b;
-$color-danger-soft: #3b1518;
-$color-success: #4caf50;
-$color-warning: #ffb020;
-$color-info: #38bdf8;
+$color-accent-soft: #cccccc;
+$color-danger: #ffffff;
+$color-danger-soft: #333333;
+$color-success: #ffffff;
+$color-warning: #ffffff;
+$color-info: #ffffff;
 
-// Тени и размытие
-$shadow-soft: 0 12px 40px rgba(0, 0, 0, 0.55);
-$shadow-subtle: 0 8px 24px rgba(0, 0, 0, 0.45);
-$backdrop-blur: blur(16px);
+// Тени (строгие, без размытия)
+$shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.8);
+$shadow-subtle: 0 1px 4px rgba(0, 0, 0, 0.6);
+$backdrop-blur: none;
 
-// Радиусы
-$radius-xs: 4px;
-$radius-sm: 8px;
-$radius-md: 12px;
-$radius-lg: 18px;
-$radius-full: 999px;
+// Радиусы (линейный стиль - только прямые углы)
+$radius-xs: 0;
+$radius-sm: 0;
+$radius-md: 0;
+$radius-lg: 0;
+$radius-full: 0;
 
 // Отступы
 $space-xs: 4px;
