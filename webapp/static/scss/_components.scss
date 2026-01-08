@@ -1,49 +1,76 @@
 @import "variables";
 @import "mixins";
 
+.theme-toggle {
+  @include button-reset;
+  width: 42px;
+  height: 42px;
+  border-radius: 0;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: var(--color-bg-soft);
+  transition: transform $transition-fast, background $transition-fast;
+
+  i {
+    width: 18px;
+    height: 18px;
+    color: var(--color-text);
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    background: var(--color-hover);
+  }
+
+  &:active {
+    transform: translateY(1px) scale(0.98);
+  }
+}
+
 .refresh-btn-header,
 .back-btn {
   @include button-reset;
   width: 42px;
   height: 42px;
   border-radius: 0;
-  border: 1px solid $color-border-strong;
+  border: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  background: $color-bg-soft;
-  box-shadow: $shadow-subtle;
-  transition: transform $transition-fast, box-shadow $transition-fast,
-    border-color $transition-fast, background $transition-fast;
+  background: var(--color-bg-soft);
+  transition: transform $transition-fast, background $transition-fast;
 
   i {
     width: 18px;
     height: 18px;
-    color: $color-text;
+    color: var(--color-text);
   }
 
   &:hover {
     transform: translateY(-1px);
-    border-color: $color-accent;
-    background: $color-bg-elevated;
-    box-shadow: $shadow-soft;
+    background: var(--color-hover);
   }
 
   &:active {
     transform: translateY(1px) scale(0.98);
-    box-shadow: $shadow-subtle;
   }
 }
 
 .stats {
   .stat-card {
     @include glass-panel($space-md);
-    background: $color-bg-soft;
-    border-radius: 0;
-    border: 1px solid $color-border-strong;
+    background: var(--color-bg-soft);
     text-align: left;
     position: relative;
+    transition: background $transition-fast;
+
+    &:hover {
+      background: var(--color-hover);
+    }
 
     .stat-icon {
       margin-bottom: $space-sm;
@@ -51,7 +78,7 @@
       i {
         width: 22px;
         height: 22px;
-        color: $color-accent;
+        color: var(--color-accent);
       }
     }
 
@@ -60,6 +87,7 @@
       font-weight: 650;
       letter-spacing: 0.08em;
       text-transform: uppercase;
+      color: var(--color-text);
     }
 
     .stat-label {
@@ -67,7 +95,7 @@
       font-size: $font-size-xs;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: $color-text-soft;
+      color: var(--color-text-soft);
     }
   }
 }
@@ -83,18 +111,15 @@
   display: flex;
   align-items: center;
   padding: $space-md;
-  background: $color-bg-soft;
+  background: var(--color-bg-soft);
   border-radius: 0;
-  border: 1px solid $color-border-strong;
+  border: none;
   cursor: pointer;
-  transition: transform $transition-base, box-shadow $transition-base, border-color $transition-base,
-    background $transition-base;
+  transition: transform $transition-base, background $transition-base;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: $shadow-soft;
-    border-color: $color-accent;
-    background: $color-bg-elevated;
+    transform: translateY(-1px);
+    background: var(--color-hover);
   }
 }
 
@@ -103,13 +128,13 @@
   width: 46px;
   height: 46px;
   border-radius: 0;
-  border: 1px solid $color-border-strong;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   margin-right: $space-md;
-  background: $color-bg;
+  background: var(--color-bg-elevated);
 
   img,
   video {
@@ -137,7 +162,7 @@
     flex-wrap: wrap;
     gap: $space-sm;
     font-size: $font-size-xs;
-    color: $color-text-soft;
+    color: var(--color-text-soft);
   }
 }
 
@@ -149,7 +174,6 @@
 
 .chat-type {
   @include pill;
-  border-color: $color-border-strong;
 }
 
 .chat-delete-btn {
@@ -157,13 +181,13 @@
   width: 32px;
   height: 32px;
   border-radius: 0;
-  border: 1px solid $color-border-strong;
+  border: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: $color-text;
-  background: $color-bg-soft;
+  color: var(--color-text);
+  background: var(--color-bg-soft);
   transition: all $transition-fast;
 
   i {
@@ -172,9 +196,7 @@
   }
 
   &:hover {
-    background: $color-bg-elevated;
-    border-color: $color-accent;
-    box-shadow: $shadow-subtle;
+    background: var(--color-hover);
   }
 
   &:active {
@@ -200,13 +222,13 @@
 
 .search-input,
 .filter-select {
-  background: $color-bg-soft;
+  background: var(--color-bg-soft);
   border-radius: 0;
-  border: 1px solid $color-border-strong;
-  color: $color-text;
+  border: none;
+  color: var(--color-text);
   font-size: $font-size-sm;
   padding: $space-sm $space-md;
-  transition: border-color $transition-fast, background $transition-fast;
+  transition: background $transition-fast;
 
   &:focus {
     @include focus-ring;
@@ -221,14 +243,14 @@
 .refresh-btn {
   @include button-reset;
   border-radius: 0;
-  border: 1px solid $color-border-strong;
+  border: none;
   padding: $space-sm $space-md;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  background: $color-bg-soft;
-  color: $color-text;
+  background: var(--color-bg-soft);
+  color: var(--color-text);
   font-size: $font-size-sm;
   text-transform: uppercase;
   letter-spacing: 0.16em;
@@ -241,9 +263,8 @@
   }
 
   &:hover {
-    border-color: $color-accent;
     transform: translateY(-1px);
-    background: $color-bg-elevated;
+    background: var(--color-hover);
   }
 
   &:active {
@@ -257,14 +278,14 @@
   align-items: center;
   gap: $space-md;
   padding: $space-xl;
-  color: $color-text-soft;
+  color: var(--color-text-soft);
 
   .loading-spinner {
     width: 40px;
     height: 40px;
     border-radius: 0;
-    border: 3px solid $color-border-soft;
-    border-top-color: $color-accent;
+    border: 3px solid var(--color-text-soft);
+    border-top-color: var(--color-accent);
     animation: spin 1s linear infinite;
   }
 }
@@ -281,14 +302,13 @@
   align-items: center;
   padding: $space-md;
   border-radius: 0;
-  background: $color-bg-soft;
-  border: 1px solid $color-border-strong;
+  background: var(--color-bg-soft);
+  border: none;
   transition: all $transition-fast;
 
   &:hover {
-    border-color: $color-accent;
     transform: translateY(-1px);
-    background: $color-bg-elevated;
+    background: var(--color-hover);
   }
 }
 
@@ -306,7 +326,7 @@
     flex-wrap: wrap;
     gap: $space-xs;
     font-size: $font-size-xs;
-    color: $color-text-soft;
+    color: var(--color-text-soft);
   }
 }
 
@@ -316,7 +336,7 @@
   &.admin,
   &.creator,
   &.bot {
-    border-color: $color-border-strong;
+    // Используем стиль из mixin pill
   }
 }
 
@@ -325,12 +345,12 @@
   width: 34px;
   height: 34px;
   border-radius: 0;
-  border: 1px solid $color-border-strong;
+  border: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  background: $color-bg-soft;
+  background: var(--color-bg-soft);
   transition: all $transition-fast;
 
   i {
@@ -339,8 +359,7 @@
   }
 
   &:hover {
-    background: $color-bg-elevated;
-    border-color: $color-accent;
+    background: var(--color-hover);
   }
 }
 
@@ -355,7 +374,7 @@
 .pagination-btn {
   @include button-reset;
   border-radius: 0;
-  border: 1px solid $color-border-strong;
+  border: none;
   padding: 8px 18px;
   display: inline-flex;
   align-items: center;
@@ -363,13 +382,14 @@
   text-transform: uppercase;
   letter-spacing: 0.16em;
   font-size: $font-size-xs;
-  color: $color-text-soft;
+  color: var(--color-text-soft);
+  background: var(--color-bg-soft);
   cursor: pointer;
   transition: all $transition-fast;
 
   &:hover:not(:disabled) {
-    color: $color-accent;
-    border-color: $color-accent;
+    color: var(--color-accent);
+    background: var(--color-hover);
   }
 
   &:disabled {
@@ -380,7 +400,7 @@
 
 .pagination-info {
   font-size: $font-size-xs;
-  color: $color-text-soft;
+  color: var(--color-text-soft);
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -389,14 +409,15 @@
   margin: $space-md 0;
   padding: $space-md;
   border-radius: 0;
-  border: 1px solid $color-border-strong;
-  background: $color-bg-soft;
+  border: none;
+  background: var(--color-bg-soft);
+  color: var(--color-text);
 }
 
 .empty-state {
   padding: $space-2xl $space-lg;
   text-align: center;
-  color: $color-text-soft;
+  color: var(--color-text-soft);
 }
 
 .toast {
@@ -409,9 +430,9 @@
   font-size: $font-size-sm;
   font-weight: 500;
   max-width: 92%;
-  color: $color-text;
-  background: $color-bg;
-  border: 1px solid $color-border-strong;
+  color: var(--color-text);
+  background: var(--color-bg-elevated);
+  border: none;
   box-shadow: $shadow-soft;
   opacity: 0;
   transition: all $transition-base;
@@ -422,20 +443,11 @@
     transform: translateX(-50%) translateY(0);
   }
 
-  &.toast-success {
-    border-color: $color-border-strong;
-  }
-
-  &.toast-error {
-    border-color: $color-border-strong;
-  }
-
-  &.toast-warning {
-    border-color: $color-border-strong;
-  }
-
+  &.toast-success,
+  &.toast-error,
+  &.toast-warning,
   &.toast-info {
-    border-color: $color-border-strong;
+    // Все тосты одинаковые в черно-белом спектре
   }
 }
 

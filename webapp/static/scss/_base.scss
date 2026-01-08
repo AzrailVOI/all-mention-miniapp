@@ -14,15 +14,39 @@ body {
   height: 100%;
 }
 
+// CSS переменные для темы
+:root {
+  --color-bg: #{$color-bg-dark};
+  --color-bg-elevated: #{$color-bg-elevated-dark};
+  --color-bg-soft: #{$color-bg-soft-dark};
+  --color-text: #{$color-text-dark};
+  --color-text-muted: #{$color-text-muted-dark};
+  --color-text-soft: #{$color-text-soft-dark};
+  --color-accent: #{$color-accent-dark};
+  --color-hover: #{$color-hover-dark};
+}
+
+body.theme-light {
+  --color-bg: #{$color-bg-light};
+  --color-bg-elevated: #{$color-bg-elevated-light};
+  --color-bg-soft: #{$color-bg-soft-light};
+  --color-text: #{$color-text-light};
+  --color-text-muted: #{$color-text-muted-light};
+  --color-text-soft: #{$color-text-soft-light};
+  --color-accent: #{$color-accent-light};
+  --color-hover: #{$color-hover-light};
+}
+
 body {
   font-family: $font-family-base;
-  background: $color-bg;
-  color: $color-text;
+  background: var(--color-bg);
+  color: var(--color-text);
   min-height: 100vh;
   padding: $space-lg;
   display: flex;
   justify-content: center;
   align-items: stretch;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .container {

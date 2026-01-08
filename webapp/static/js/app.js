@@ -466,3 +466,30 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+// Управление темой
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.body.className = savedTheme === 'light' ? 'theme-light' : '';
+    updateThemeIcon(savedTheme);
+}
+
+function toggleTheme() {
+    const isLight = document.body.classList.contains('theme-light');
+    const newTheme = isLight ? 'dark' : 'light';
+    document.body.className = newTheme === 'light' ? 'theme-light' : '';
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon(newTheme);
+}
+
+function updateThemeIcon(theme) {
+    const icon = document.getElementById('theme-icon');
+    if (icon) {
+        icon.setAttribute('data-lucide', theme === 'light' ? 'moon' : 'sun');
+        lucide.createIcons();
+    }
+}
+
+// Инициализация темы при загрузке
+document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
+});
