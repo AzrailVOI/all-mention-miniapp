@@ -42,7 +42,6 @@ class ChatStorageService:
             
             if is_new:
                 logger.info(f"[ChatStorage] Зарегистрирован новый чат: {chat.id} ({chat.type}) - {chat_data['title']}")
-                print(f"[ChatStorage] Зарегистрирован новый чат: {chat.id} ({chat.type}) - {chat_data['title']}")
             else:
                 logger.debug(f"[ChatStorage] Обновлен чат: {chat.id} ({chat.type}) - {chat_data['title']}")
             
@@ -50,11 +49,9 @@ class ChatStorageService:
             self._save_to_file()
             
             logger.info(f"[ChatStorage] Всего чатов в хранилище: {len(self._chats)}")
-            print(f"[ChatStorage] Всего чатов в хранилище: {len(self._chats)}")
             
         except Exception as e:
             logger.error(f"[ChatStorage] Ошибка при регистрации чата: {e}")
-            print(f"[ChatStorage] Ошибка при регистрации чата: {e}")
     
     def get_chat(self, chat_id: int) -> Optional[Dict]:
         """Получает информацию о чате"""
@@ -64,7 +61,6 @@ class ChatStorageService:
         """Получает список всех зарегистрированных чатов"""
         chats = list(self._chats.values())
         logger.info(f"[ChatStorage] Запрошен список чатов: возвращено {len(chats)} чатов")
-        print(f"[ChatStorage] Запрошен список чатов: возвращено {len(chats)} чатов")
         return chats
     
     def get_chats_by_type(self, chat_type: str) -> List[Dict]:
@@ -121,7 +117,6 @@ class ChatStorageService:
             logger.debug(f"[ChatStorage] Чаты сохранены в файл: {self._storage_file}")
         except Exception as e:
             logger.error(f"[ChatStorage] Ошибка при сохранении чатов в файл: {e}")
-            print(f"[ChatStorage] Ошибка при сохранении чатов в файл: {e}")
     
     def _load_from_file(self) -> None:
         """Загружает чаты из файла"""
@@ -132,13 +127,10 @@ class ChatStorageService:
                     # Конвертируем ключи обратно в int
                     self._chats = {int(k): v for k, v in loaded_chats.items()}
                 logger.info(f"[ChatStorage] Загружено {len(self._chats)} чатов из файла: {self._storage_file}")
-                print(f"[ChatStorage] Загружено {len(self._chats)} чатов из файла: {self._storage_file}")
             else:
                 logger.info(f"[ChatStorage] Файл {self._storage_file} не найден, начинаем с пустого хранилища")
-                print(f"[ChatStorage] Файл {self._storage_file} не найден, начинаем с пустого хранилища")
         except Exception as e:
             logger.error(f"[ChatStorage] Ошибка при загрузке чатов из файла: {e}")
-            print(f"[ChatStorage] Ошибка при загрузке чатов из файла: {e}")
             self._chats = {}
 
 

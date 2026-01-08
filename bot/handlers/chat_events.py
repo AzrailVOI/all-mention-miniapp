@@ -25,7 +25,6 @@ async def handle_chat_member_update(update: Update, context: ContextTypes.DEFAUL
     # Логируем добавление бота
     if new_status in ["member", "administrator", "creator"] and old_status == "left":
         logger.info(f"[ChatEvents] Бот добавлен в чат: {chat.id} ({chat.type}) - {chat.title or 'Без названия'}")
-        print(f"[ChatEvents] Бот добавлен в чат: {chat.id} ({chat.type}) - {chat.title or 'Без названия'}")
 
 
 async def handle_my_chat_member_update(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -44,10 +43,8 @@ async def handle_my_chat_member_update(update: Update, context: ContextTypes.DEF
     # Регистрируем чат при добавлении бота
     if new_status in ["member", "administrator", "creator"] and old_status == "left":
         logger.info(f"[ChatEvents] Бот добавлен в чат: {chat.id} ({chat.type}) - {chat.title or 'Без названия'}")
-        print(f"[ChatEvents] Бот добавлен в чат: {chat.id} ({chat.type}) - {chat.title or 'Без названия'}")
     elif new_status == "left":
         logger.info(f"[ChatEvents] Бот удален из чата: {chat.id} ({chat.type})")
-        print(f"[ChatEvents] Бот удален из чата: {chat.id} ({chat.type})")
     else:
         logger.debug(f"[ChatEvents] Статус бота изменен в чате {chat.id}: {old_status} -> {new_status}")
 

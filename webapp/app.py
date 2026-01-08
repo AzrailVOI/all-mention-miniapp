@@ -66,7 +66,6 @@ def index():
 def members_page():
     """Страница участников чата"""
     logger.info(f"[API] GET /members - запрос страницы участников")
-    print(f"[API] GET /members - запрос страницы участников")
     return render_template('members.html', version=APP_VERSION)
 
 
@@ -90,11 +89,9 @@ def get_chats():
         user_id = data.get('user_id')
         
         logger.info(f"[API] GET /api/chats - запрос от пользователя {user_id}")
-        print(f"[API] GET /api/chats - запрос от пользователя {user_id}")
         
         if not user_id:
             logger.warning(f"[API] GET /api/chats - User ID не предоставлен")
-            print(f"[API] GET /api/chats - User ID не предоставлен")
             return jsonify({
                 'success': False,
                 'error': 'User ID не предоставлен'
@@ -103,7 +100,6 @@ def get_chats():
         # Валидация данных Mini App
         if not validate_telegram_webapp_data(init_data):
             logger.warning(f"[API] Невалидные данные от пользователя {user_id}")
-            print(f"[API] Невалидные данные от пользователя {user_id}")
         
         # Создаем бота
         bot = Bot(token=Config.TOKEN)
@@ -129,13 +125,11 @@ def get_chats():
                 # getUpdates нельзя использовать параллельно с polling
                 stored_chats = chat_storage.get_all_chats()
                 logger.info(f"[API] Чатов в хранилище: {len(stored_chats)}")
-                print(f"[API] Чатов в хранилище: {len(stored_chats)}")
                 
                 for stored_chat in stored_chats:
                     all_chat_ids.add(stored_chat['id'])
                 
                 logger.info(f"[API] Всего чатов для проверки: {len(all_chat_ids)}")
-                print(f"[API] Всего чатов для проверки: {len(all_chat_ids)}")
                 
                 # Если нет чатов, выводим предупреждение
                 if len(all_chat_ids) == 0:
@@ -144,8 +138,6 @@ def get_chats():
                     logger.warning(f"[API] 1. Получении сообщений в группах")
                     logger.warning(f"[API] 2. Добавлении бота в группы (событие my_chat_member)")
                     logger.warning(f"[API] 3. Использовании команды /register в группе")
-                    print(f"[API] ВНИМАНИЕ: Не найдено чатов в хранилище!")
-                    print(f"[API] Чаты будут появляться автоматически при получении сообщений или событий")
                 
                 # Проверяем каждый чат
                 for chat_id in all_chat_ids:
@@ -160,57 +152,44 @@ def get_chats():
                         
                         chat_title = chat.title or 'Без названия'
                         logger.info(f"[API] Проверка чата {chat_id} ({chat_title}, {chat.type})")
-                        print(f"[API] Проверка чата {chat_id} ({chat_title}, {chat.type})")
                         
                         # Проверяем, является ли бот администратором
                         is_bot_admin = await chat_service.is_bot_admin(chat_id)
                         logger.info(f"[API] Чат {chat_id}: бот админ = {is_bot_admin}")
-                        print(f"[API] Чат {chat_id}: бот админ = {is_bot_admin}")
                         
                         if not is_bot_admin:
                             skipped_not_admin += 1
                             logger.warning(f"[API] Чат {chat_id} пропущен: бот не является администратором")
-                            print(f"[API] Чат {chat_id} пропущен: бот не является администратором")
                             continue
                         
                         # Проверяем, является ли пользователь создателем
                         is_user_creator = await chat_service.is_user_creator(chat_id, user_id)
                         logger.info(f"[API] Чат {chat_id}: пользователь {user_id} создатель = {is_user_creator}")
-                        print(f"[API] Чат {chat_id}: пользователь {user_id} создатель = {is_user_creator}")
                         
                         if not is_user_creator:
                             skipped_not_creator += 1
                             logger.warning(f"[API] Чат {chat_id} пропущен: пользователь {user_id} не является создателем")
-                            print(f"[API] Чат {chat_id} пропущен: пользователь {user_id} не является создателем")
                             continue
                         
                         # Получаем фото чата (если есть)
                         chat_photo_url = None
                         try:
                             logger.info(f"[API] Проверка фото чата {chat_id}: hasattr(chat, 'photo') = {hasattr(chat, 'photo')}")
-                            print(f"[API] Проверка фото чата {chat_id}: hasattr(chat, 'photo') = {hasattr(chat, 'photo')}")
                             
                             if hasattr(chat, 'photo') and chat.photo:
                                 logger.info(f"[API] Чат {chat_id} имеет фото: {chat.photo}")
-                                print(f"[API] Чат {chat_id} имеет фото: {chat.photo}")
                                 
                                 # Получаем самое большое фото
                                 photo = chat.photo.big_file_id
                                 logger.info(f"[API] Получение файла фото чата {chat_id}: file_id = {photo}")
-                                print(f"[API] Получение файла фото чата {chat_id}: file_id = {photo}")
                                 
                                 file = await bot.get_file(photo)
                                 chat_photo_url = file.file_path
                                 logger.info(f"[API] Получено фото чата {chat_id}: {chat_photo_url}")
-                                print(f"[API] Получено фото чата {chat_id}: {chat_photo_url}")
                             else:
                                 logger.info(f"[API] Чат {chat_id} не имеет фото профиля")
-                                print(f"[API] Чат {chat_id} не имеет фото профиля")
                         except Exception as e:
                             logger.error(f"[API] Ошибка при получении фото чата {chat_id}: {e}", exc_info=True)
-                            print(f"[API] Ошибка при получении фото чата {chat_id}: {e}")
-                            import traceback
-                            traceback.print_exc()
                         
                         # Формируем данные чата
                         chat_data = {
@@ -227,20 +206,16 @@ def get_chats():
                             full_photo_url = f"https://api.telegram.org/file/bot{Config.TOKEN}/{chat_photo_url}"
                             chat_data['photo_url'] = full_photo_url
                             logger.info(f"[API] Чат {chat_id}: полный URL фото = {full_photo_url}")
-                            print(f"[API] Чат {chat_id}: полный URL фото = {full_photo_url}")
                         else:
                             logger.info(f"[API] Чат {chat_id}: фото не добавлено в данные")
-                            print(f"[API] Чат {chat_id}: фото не добавлено в данные")
                         
                         filtered_chats.append(chat_data)
                         logger.info(f"[API] Чат {chat_id} добавлен в результат с photo_url = {chat_data.get('photo_url', 'None')}")
-                        print(f"[API] Чат {chat_id} добавлен в результат с photo_url = {chat_data.get('photo_url', 'None')}")
                         
                         # Сохраняем в хранилище
                         chat_storage.register_chat(chat)
                         
                         logger.info(f"[API] Чат {chat_id} добавлен в результат")
-                        print(f"[API] Чат {chat_id} добавлен в результат")
                         
                     except TelegramError as e:
                         # Игнорируем ошибки доступа к чатам
@@ -248,12 +223,10 @@ def get_chats():
                         continue
                     except Exception as e:
                         logger.error(f"[API] Ошибка при обработке чата {chat_id}: {e}")
-                        print(f"[API] Ошибка при обработке чата {chat_id}: {e}")
                         continue
                         
             except Exception as e:
                 logger.error(f"[API] Ошибка при получении обновлений: {e}")
-                print(f"[API] Ошибка при получении обновлений: {e}")
         
         # Запускаем async функцию
         try:
@@ -272,8 +245,6 @@ def get_chats():
         
         logger.info(f"[API] Результат фильтрации: {len(filtered_chats)} чатов")
         logger.info(f"[API] Пропущено (не группа): {skipped_not_group}, (бот не админ): {skipped_not_admin}, (пользователь не создатель): {skipped_not_creator}")
-        print(f"[API] Результат фильтрации: {len(filtered_chats)} чатов")
-        print(f"[API] Пропущено (не группа): {skipped_not_group}, (бот не админ): {skipped_not_admin}, (пользователь не создатель): {skipped_not_creator}")
         
         # Подсчитываем статистику
         stats = {
@@ -300,7 +271,6 @@ def get_chats():
             )
         
         logger.info(f"[API] GET /api/chats - успешно возвращено {len(filtered_chats)} чатов")
-        print(f"[API] GET /api/chats - успешно возвращено {len(filtered_chats)} чатов")
         
         response_data = {
             'success': True,
@@ -315,7 +285,6 @@ def get_chats():
         
     except Exception as e:
         logger.error(f"[API] Ошибка при получении списка чатов: {e}", exc_info=True)
-        print(f"[API] Ошибка при получении списка чатов: {e}")
         return jsonify({
             'success': False,
             'error': 'Не удалось загрузить список чатов'
@@ -331,7 +300,6 @@ def get_chat_members(chat_id):
         chat_id = int(chat_id)
     except (ValueError, TypeError):
         logger.warning(f"[API] GET /api/chats/{chat_id}/members - неверный формат chat_id")
-        print(f"[API] GET /api/chats/{chat_id}/members - неверный формат chat_id")
         return jsonify({
             'success': False,
             'error': 'Неверный формат ID чата'
@@ -341,11 +309,9 @@ def get_chat_members(chat_id):
         user_id = data.get('user_id')
         
         logger.info(f"[API] GET /api/chats/{chat_id}/members - запрос от пользователя {user_id}")
-        print(f"[API] GET /api/chats/{chat_id}/members - запрос от пользователя {user_id}")
         
         if not user_id:
             logger.warning(f"[API] GET /api/chats/{chat_id}/members - User ID не предоставлен")
-            print(f"[API] GET /api/chats/{chat_id}/members - User ID не предоставлен")
             return jsonify({
                 'success': False,
                 'error': 'User ID не предоставлен'
@@ -362,7 +328,6 @@ def get_chat_members(chat_id):
             # Проверяем, является ли пользователь создателем
             is_user_creator = await chat_service.is_user_creator(chat_id, user_id)
             logger.info(f"[API] Чат {chat_id}: пользователь {user_id} создатель = {is_user_creator}")
-            print(f"[API] Чат {chat_id}: пользователь {user_id} создатель = {is_user_creator}")
         
             if not is_user_creator:
                 return None, "Пользователь не является создателем группы"
@@ -370,7 +335,6 @@ def get_chat_members(chat_id):
             # Проверяем, является ли бот администратором
             is_bot_admin = await chat_service.is_bot_admin(chat_id)
             logger.info(f"[API] Чат {chat_id}: бот админ = {is_bot_admin}")
-            print(f"[API] Чат {chat_id}: бот админ = {is_bot_admin}")
             
             if not is_bot_admin:
                 return None, "Бот не является администратором группы"
@@ -378,11 +342,9 @@ def get_chat_members(chat_id):
             # Получаем список участников
             members = await chat_service.get_chat_members_list(chat_id)
             logger.info(f"[API] Получено {len(members)} участников для чата {chat_id}")
-            print(f"[API] Получено {len(members)} участников для чата {chat_id}")
             
             # Формируем полные URL для фото профиля
             logger.info(f"[API] Формирование URL для {len(members)} участников")
-            print(f"[API] Формирование URL для {len(members)} участников")
             
             for member in members:
                 if member.get('profile_photo_url'):
@@ -391,10 +353,8 @@ def get_chat_members(chat_id):
                     full_url = f"https://api.telegram.org/file/bot{Config.TOKEN}/{file_path}"
                     member['profile_photo_url'] = full_url
                     logger.info(f"[API] Участник {member.get('id')} ({member.get('first_name')}): фото URL = {full_url}")
-                    print(f"[API] Участник {member.get('id')} ({member.get('first_name')}): фото URL = {full_url}")
                 else:
                     logger.info(f"[API] Участник {member.get('id')} ({member.get('first_name')}): нет фото профиля")
-                    print(f"[API] Участник {member.get('id')} ({member.get('first_name')}): нет фото профиля")
             
             return members, None
         
@@ -415,14 +375,12 @@ def get_chat_members(chat_id):
         
         if error:
             logger.warning(f"[API] GET /api/chats/{chat_id}/members - ошибка: {error}")
-            print(f"[API] GET /api/chats/{chat_id}/members - ошибка: {error}")
             return jsonify({
                 'success': False,
                 'error': error
             }), 403
         
         logger.info(f"[API] GET /api/chats/{chat_id}/members - успешно возвращено {len(members)} участников")
-        print(f"[API] GET /api/chats/{chat_id}/members - успешно возвращено {len(members)} участников")
         
         return jsonify({
             'success': True,
@@ -431,14 +389,12 @@ def get_chat_members(chat_id):
         
     except TelegramError as e:
         logger.error(f"[API] Ошибка Telegram API при получении участников чата {chat_id}: {e}")
-        print(f"[API] Ошибка Telegram API при получении участников чата {chat_id}: {e}")
         return jsonify({
             'success': False,
             'error': f'Ошибка Telegram API: {str(e)}'
         }), 500
     except Exception as e:
         logger.error(f"[API] Ошибка при получении участников чата {chat_id}: {e}", exc_info=True)
-        print(f"[API] Ошибка при получении участников чата {chat_id}: {e}")
         return jsonify({
             'success': False,
             'error': 'Не удалось загрузить список участников'
