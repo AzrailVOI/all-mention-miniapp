@@ -1,6 +1,6 @@
 // Рендеринг чатов
-import type { Chat } from './types';
-import { escapeHtml, getChatIcon, getChatTypeLabel } from './utils';
+import type { Chat } from './types.js';
+import { escapeHtml, getChatIcon, getChatTypeLabel } from './utils.js';
 
 let chatsContainer: HTMLElement | null = null;
 

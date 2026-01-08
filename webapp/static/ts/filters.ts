@@ -1,7 +1,7 @@
 // Управление фильтрами и сортировкой
-import type { Chat, FilterType, SortBy, SortOrder } from './types';
-import { renderChats } from './render';
-import { renderStats } from './stats';
+import { renderChats } from './render.js';
+import { renderStats } from './stats.js';
+import type { Chat, FilterType, SortBy, SortOrder } from './types.js';
 
 let currentChats: Chat[] = [];
 let currentStats: any = null;

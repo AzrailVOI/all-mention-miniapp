@@ -1,5 +1,5 @@
 // Управление статистикой
-import type { ChatStats } from './types';
+import type { ChatStats } from './types.js';
 
 let statsContainer: HTMLElement | null = null;
 

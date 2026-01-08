@@ -1,5 +1,4 @@
 // Утилиты
-import type { Chat } from './types';
 
 /**
  * Экранирование HTML для предотвращения XSS

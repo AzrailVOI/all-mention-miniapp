@@ -1,9 +1,9 @@
 // Главный файл приложения
-import { loadChats } from './api';
-import { initStatsContainer, toggleStats } from './stats';
-import { initModalHandlers } from './modal';
-import { initTheme } from './theme';
-import { initLoadingElements } from './loading';
+import { loadChats } from './api.js';
+import { initLoadingElements } from './loading.js';
+import { initModalHandlers } from './modal.js';
+import { initStatsContainer, toggleStats } from './stats.js';
+import { initTheme } from './theme.js';
 
 /**
  * Инициализация приложения

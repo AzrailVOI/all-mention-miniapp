@@ -1,9 +1,9 @@
 // API запросы
-import type { ChatListResponse, Chat, ChatStats } from './types';
-import { renderStats } from './stats';
-import { showToast, showError } from './utils';
-import { setCurrentChats, applyFilters } from './filters';
-import { hideLoading, showLoading } from './loading';
+import { applyFilters, setCurrentChats } from './filters.js';
+import { hideLoading, showLoading } from './loading.js';
+import { renderStats } from './stats.js';
+import type { ChatListResponse } from './types.js';
+import { showError, showToast } from './utils.js';
 
 const API_URL = '/api/chats';
 
