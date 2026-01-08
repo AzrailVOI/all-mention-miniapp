@@ -4,7 +4,6 @@ from typing import Optional
 from telegram.error import (
     TelegramError,
     BadRequest,
-    Unauthorized,
     Forbidden,
     NotFound,
     Conflict,
@@ -61,10 +60,6 @@ def handle_telegram_error(error: TelegramError, context: Optional[str] = None) -
     if isinstance(error, InvalidToken):
         logger.error(f"Invalid bot token{context_str}: {error}")
         return UnauthorizedError("Неверный токен бота")
-    
-    elif isinstance(error, Unauthorized):
-        logger.error(f"Bot unauthorized{context_str}: {error}")
-        return UnauthorizedError("Бот не авторизован")
     
     elif isinstance(error, Forbidden):
         logger.error(f"Access forbidden{context_str}: {error}")
