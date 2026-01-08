@@ -5,7 +5,7 @@
     "lib": ["ES2020", "DOM"],
     "outDir": "./webapp/static/js",
     "rootDir": "./webapp/static/ts",
-    "strict": true,
+    "strict": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,

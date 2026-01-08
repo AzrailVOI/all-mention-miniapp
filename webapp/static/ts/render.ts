@@ -74,8 +74,9 @@ export function renderChats(chats: Chat[] | null, infoMessage: string | null): v
             avatarHtml = `<div class="chat-avatar-icon">${getChatIcon(chat.type)}</div>`;
         }
         
+        const escapedTitle = escapeHtml(chatTitle);
         return `
-        <div class="chat-item" onclick="window.openChat(${chat.id}, '${escapeHtml(chatTitle)}')">
+        <div class="chat-item" data-chat-id="${chat.id}" data-chat-title="${escapedTitle}">
             <div class="chat-avatar">
                 ${avatarHtml}
             </div>
@@ -87,7 +88,7 @@ export function renderChats(chats: Chat[] | null, infoMessage: string | null): v
                 </div>
             </div>
             <div class="chat-actions">
-                <button class="chat-delete-btn" onclick="event.stopPropagation(); window.deleteChat(${chat.id}, '${escapeHtml(chatTitle)}')" title="Удалить чат из списка">
+                <button class="chat-delete-btn" data-chat-id="${chat.id}" data-chat-title="${escapedTitle}" title="Удалить чат из списка">
                     <i data-lucide="trash-2"></i>
                 </button>
                 <i data-lucide="chevron-right" class="chat-arrow"></i>
@@ -100,4 +101,39 @@ export function renderChats(chats: Chat[] | null, infoMessage: string | null): v
     if (window.lucide) {
         window.lucide.createIcons();
     }
+    
+    // Добавляем обработчики событий для чатов
+    setTimeout(() => {
+        const chatItems = chatsContainer.querySelectorAll('.chat-item');
+        chatItems.forEach(item => {
+            const chatIdAttr = item.getAttribute('data-chat-id');
+            const chatTitleAttr = item.getAttribute('data-chat-title');
+            if (!chatIdAttr || !chatTitleAttr) return;
+            
+            const chatId = parseInt(chatIdAttr);
+            const chatTitle = decodeURIComponent(chatTitleAttr);
+            
+            // Обработчик клика по элементу чата
+            item.addEventListener('click', (e) => {
+                // Не открываем чат, если клик был по кнопке удаления
+                if ((e.target as HTMLElement).closest('.chat-delete-btn')) {
+                    return;
+                }
+                if (window.openChat) {
+                    window.openChat(chatId, chatTitle);
+                }
+            });
+            
+            // Обработчик кнопки удаления
+            const deleteBtn = item.querySelector('.chat-delete-btn');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    if (window.deleteChat) {
+                        await window.deleteChat(chatId, chatTitle);
+                    }
+                });
+            }
+        });
+    }, 0);
 }

@@ -1,13 +1,11 @@
-// Управление состоянием загрузки
+// Управление состоянием загрузки (только skeleton screens)
 
-let loadingElement: HTMLElement | null = null;
 let chatsContainer: HTMLElement | null = null;
 
 /**
  * Инициализация элементов загрузки
  */
 export function initLoadingElements(): void {
-    loadingElement = document.querySelector('.loading');
     chatsContainer = document.querySelector('.chat-list');
 }
 
@@ -32,29 +30,22 @@ function generateSkeletonChats(): string {
 }
 
 /**
- * Показать загрузку
+ * Показать загрузку (только skeleton screens)
  */
 export function showLoading(): void {
-    if (!loadingElement) {
+    if (!chatsContainer) {
         initLoadingElements();
     }
-    if (loadingElement) {
-        loadingElement.style.display = 'flex';
-    }
     if (chatsContainer) {
-        // Показываем skeleton screens вместо пустого контейнера
+        // Показываем только skeleton screens
         chatsContainer.innerHTML = generateSkeletonChats();
     }
 }
 
 /**
- * Скрыть загрузку
+ * Скрыть загрузку (пустая функция, skeleton просто заменяется контентом)
  */
 export function hideLoading(): void {
-    if (!loadingElement) {
-        initLoadingElements();
-    }
-    if (loadingElement) {
-        loadingElement.style.display = 'none';
-    }
+    // Skeleton автоматически заменяется контентом при рендеринге
+    // Ничего не делаем
 }

@@ -41,6 +41,12 @@ async function init(): Promise<void> {
     initStatsContainer();
     initLoadingElements();
     
+    // Удаляем loading элемент, если он есть (используем только skeleton)
+    const loadingElement = document.querySelector('.loading');
+    if (loadingElement) {
+        loadingElement.remove();
+    }
+    
     // Изначально статистика скрыта
     const statsContainer = document.querySelector('.stats');
     if (statsContainer) {
@@ -72,6 +78,26 @@ async function init(): Promise<void> {
         });
     }
     
+    // Обработчик кнопки фильтров
+    const filtersBtn = document.querySelector('.filters-btn');
+    if (filtersBtn) {
+        filtersBtn.addEventListener('click', () => {
+            if (window.openFiltersModal) {
+                window.openFiltersModal();
+            }
+        });
+    }
+    
+    // Обработчик кнопки переключения темы
+    const themeToggle = document.querySelector('.theme-toggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            if (window.toggleTheme) {
+                window.toggleTheme();
+            }
+        });
+    }
+    
     // Обработчик поиска по Enter
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
@@ -80,6 +106,45 @@ async function init(): Promise<void> {
                 if (window.performSearch) {
                     window.performSearch();
                 }
+            }
+        });
+    }
+    
+    // Обработчик кнопки поиска в модальном окне
+    const searchBtn = document.querySelector('.search-btn');
+    if (searchBtn) {
+        searchBtn.addEventListener('click', () => {
+            if (window.performSearch) {
+                window.performSearch();
+            }
+        });
+    }
+    
+    // Обработчики изменения фильтров
+    const filterType = document.getElementById('filterType');
+    const sortBy = document.getElementById('sortBy');
+    const sortOrder = document.getElementById('sortOrder');
+    
+    if (filterType) {
+        filterType.addEventListener('change', () => {
+            if (window.applyFilters) {
+                window.applyFilters();
+            }
+        });
+    }
+    
+    if (sortBy) {
+        sortBy.addEventListener('change', () => {
+            if (window.applyFilters) {
+                window.applyFilters();
+            }
+        });
+    }
+    
+    if (sortOrder) {
+        sortOrder.addEventListener('change', () => {
+            if (window.applyFilters) {
+                window.applyFilters();
             }
         });
     }
