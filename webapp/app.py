@@ -194,9 +194,27 @@ def handle_validation_error(e: ValidationError):
     }), 400
 
 
+@app.errorhandler(404)
+def handle_not_found(e):
+    """Обработчик 404 ошибок"""
+    # Для API endpoints возвращаем JSON
+    if request.path.startswith('/api/'):
+        return jsonify({
+            'success': False,
+            'error': 'Endpoint не найден'
+        }), 404
+    # Для остальных - стандартная обработка Flask
+    return f"Страница не найдена: {request.path}", 404
+
+
 @app.errorhandler(Exception)
 def handle_exception(e: Exception):
     """Глобальный обработчик исключений"""
+    # Пропускаем 404 ошибки - они обрабатываются отдельно
+    from werkzeug.exceptions import NotFound
+    if isinstance(e, NotFound):
+        raise  # Пробрасываем дальше для обработки handle_not_found
+    
     logger.error(f"Необработанное исключение: {e}", exc_info=True)
     return jsonify({
         'success': False,

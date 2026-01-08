@@ -19,13 +19,13 @@ from bot.handlers.chat_events import handle_chat_member_update, handle_my_chat_m
 if Config.LOG_JSON:
     import json
     import sys
-    from datetime import datetime
+    from datetime import datetime, timezone
     
     class JSONFormatter(logging.Formatter):
         """JSON форматтер для структурированного логирования"""
         def format(self, record):
             log_entry = {
-                'timestamp': datetime.utcnow().isoformat() + 'Z',
+                'timestamp': datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
                 'level': record.levelname,
                 'logger': record.name,
                 'message': record.getMessage(),

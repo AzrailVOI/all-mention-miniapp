@@ -18,12 +18,15 @@ def validate_telegram_webapp_data(init_data: str) -> bool:
     Telegram WebApp отправляет данные в формате query string:
     user=...&auth_date=...&hash=...
     
-    Алгоритм валидации:
+    Алгоритм валидации (согласно документации Telegram):
     1. Извлечь hash из init_data
     2. Создать data_check_string из всех полей кроме hash, отсортированных по ключу
-    3. Вычислить secret_key = HMAC-SHA256(bot_token, "WebAppData")
+    3. Вычислить secret_key = HMAC-SHA256("WebAppData", bot_token)
     4. Вычислить проверочный hash = HMAC-SHA256(secret_key, data_check_string)
     5. Сравнить с полученным hash
+    
+    Примечание: Для валидации используется BOT_TOKEN, а не WEBAPP_SECRET_KEY.
+    WEBAPP_SECRET_KEY используется только для Flask SECRET_KEY.
     
     Args:
         init_data: Строка с данными от Telegram WebApp в формате query string
@@ -74,10 +77,12 @@ def validate_telegram_webapp_data(init_data: str) -> bool:
         
         data_check_string = '\n'.join(data_check_parts)
         
-        # Вычисляем secret_key = HMAC-SHA256(bot_token, "WebAppData")
+        # Вычисляем secret_key = HMAC-SHA256("WebAppData", bot_token)
+        # ВАЖНО: Telegram требует использовать именно токен бота для валидации WebApp данных
+        # WEBAPP_SECRET_KEY используется только для Flask SECRET_KEY, не для валидации
         secret_key = hmac.new(
             "WebAppData".encode('utf-8'),
-            Config.WEBAPP_SECRET_KEY.encode('utf-8'),
+            Config.TOKEN.encode('utf-8'),
             hashlib.sha256
         ).digest()
         
