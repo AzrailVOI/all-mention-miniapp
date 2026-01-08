@@ -153,6 +153,7 @@ def members_page():
 def add_security_headers(response):
     """
     Добавляет security headers и заголовки для предотвращения кэширования.
+    Также устанавливает правильные MIME-типы для статических файлов.
     
     Security headers:
     - Content-Security-Policy: ограничивает источники контента
@@ -161,6 +162,19 @@ def add_security_headers(response):
     - Referrer-Policy: контролирует передачу referrer
     - Permissions-Policy: ограничивает доступ к API браузера
     """
+    # Устанавливаем правильный Content-Type для статических файлов
+    if request.endpoint == 'static':
+        path = request.path.lower()
+        # Принудительно устанавливаем правильный MIME-тип
+        if path.endswith('.js'):
+            response.headers['Content-Type'] = 'application/javascript; charset=utf-8'
+            # Убираем nosniff для JS файлов, чтобы браузер не блокировал их
+            # Но оставляем для безопасности других файлов
+        elif path.endswith('.css'):
+            response.headers['Content-Type'] = 'text/css; charset=utf-8'
+        elif path.endswith('.json'):
+            response.headers['Content-Type'] = 'application/json; charset=utf-8'
+    
     # Security headers для всех ответов
     # CSP для Telegram WebApp - разрешаем только необходимые источники
     csp_policy = (
@@ -182,8 +196,10 @@ def add_security_headers(response):
     # Предотвращение clickjacking
     response.headers['X-Frame-Options'] = 'SAMEORIGIN'
     
-    # Предотвращение MIME-sniffing
-    response.headers['X-Content-Type-Options'] = 'nosniff'
+    # Предотвращение MIME-sniffing (но не для статических JS/CSS файлов с правильным типом)
+    # Для статических JS/CSS файлов мы уже установили правильный Content-Type выше
+    if request.endpoint != 'static' or not (request.path.lower().endswith(('.js', '.css'))):
+        response.headers['X-Content-Type-Options'] = 'nosniff'
     
     # Контроль referrer
     response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
@@ -199,9 +215,13 @@ def add_security_headers(response):
     
     # Заголовки для предотвращения кэширования (только для HTML страниц)
     if request.endpoint == 'static' or request.endpoint == 'index' or request.endpoint == 'members_page':
-        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-        response.headers['Pragma'] = 'no-cache'
-        response.headers['Expires'] = '0'
+        # Для версионированных статических файлов - длительное кэширование
+        if request.endpoint == 'static' and ('?v=' in request.url or '?version=' in request.url):
+            response.headers['Cache-Control'] = 'public, max-age=31536000'  # 1 год
+        else:
+            response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+            response.headers['Pragma'] = 'no-cache'
+            response.headers['Expires'] = '0'
     else:
         # Для API endpoints - короткое кэширование
         response.headers['Cache-Control'] = 'no-cache, must-revalidate'
