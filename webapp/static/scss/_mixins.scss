@@ -15,7 +15,8 @@
   text-transform: uppercase;
   letter-spacing: 0.16em;
   border: none;
-  background: var(--color-bg-elevated);
+  background: var(--color-bg-soft);
+  color: var(--color-text);
 }
 
 @mixin button-reset {

@@ -181,6 +181,7 @@
     letter-spacing: 0.04em;
     text-transform: uppercase;
     margin-bottom: 2px;
+    color: var(--color-text);
   }
 
   .chat-details {
@@ -201,7 +202,9 @@
 
 .chat-type {
   @include pill;
-  border: 1px solid var(--color-border);
+  border: none;
+  background: var(--color-bg-soft);
+  color: var(--color-text);
 }
 
 .chat-delete-btn {
@@ -353,6 +356,7 @@
   .member-name {
     font-size: $font-size-md;
     font-weight: 600;
+    color: var(--color-text);
   }
 
   .member-details {
@@ -367,12 +371,14 @@
 
 .member-badge {
   @include pill;
-  border: 1px solid var(--color-border);
+  border: none;
+  background: var(--color-bg-soft);
+  color: var(--color-text);
 
   &.admin,
   &.creator,
   &.bot {
-    // Используем стиль из mixin pill
+    // Все бейджи одинаковые, выделяются фоном
   }
 }
 
