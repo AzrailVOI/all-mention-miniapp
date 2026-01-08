@@ -408,3 +408,4 @@ function updateThemeIcon(theme) {
         lucide.createIcons();
     }
 }
+

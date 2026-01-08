@@ -7,3 +7,4 @@ pydantic>=2.0.0
 
 # Для компиляции SCSS -> CSS
 libsass>=0.22.0
+
