@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Мои чаты - All Mention Bot</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📱 Мои чаты</h1>
+            <h1>Мои чаты</h1>
             <p>Список чатов, где добавлен бот</p>
         </div>
         
@@ -18,11 +19,34 @@
         
         <div class="chats-section">
             <div class="section-title">
-                <span>💬</span>
                 <span>Список чатов</span>
             </div>
+            
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="Поиск чатов...">
+                <button class="search-btn" onclick="performSearch()">
+                    <i data-lucide="search"></i>
+                </button>
+            </div>
+            
             <div class="loading" style="display: none;">Загрузка...</div>
             <div class="chat-list"></div>
+        </div>
+        
+        <!-- Модальное окно для списка участников -->
+        <div id="membersModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modalTitle">Участники чата</h2>
+                    <button class="modal-close" onclick="closeMembersModal()">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="loading" id="membersLoading" style="display: none;">Загрузка участников...</div>
+                    <div id="membersList" class="members-list"></div>
+                </div>
+            </div>
         </div>
     </div>
     

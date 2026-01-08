@@ -70,4 +70,66 @@ class ChatService:
         except TelegramError as e:
             logger.error(f"Ошибка при получении количества участников: {e}")
             return 0
+    
+    async def is_user_creator(self, chat_id: int, user_id: int) -> bool:
+        """Проверяет, является ли пользователь создателем чата"""
+        try:
+            # Получаем список администраторов
+            admins = await self.bot.get_chat_administrators(chat_id)
+            
+            # Ищем пользователя среди администраторов
+            for admin in admins:
+                if admin.user.id == user_id:
+                    # Проверяем, является ли он создателем
+                    return admin.status == "creator"
+            
+            return False
+        except TelegramError as e:
+            logger.error(f"Ошибка при проверке прав создателя: {e}")
+            return False
+    
+    async def get_chat_members_list(self, chat_id: int) -> List[dict]:
+        """
+        Получает список всех участников чата с информацией о статусе
+        Возвращает список словарей с информацией о пользователях
+        """
+        members_list = []
+        seen_user_ids = set()
+        
+        try:
+            # Получаем всех администраторов (включая создателя)
+            admins = await self.bot.get_chat_administrators(chat_id)
+            
+            for admin in admins:
+                user = admin.user
+                if user.id not in seen_user_ids:
+                    member_info = {
+                        'id': user.id,
+                        'first_name': user.first_name or '',
+                        'last_name': user.last_name or '',
+                        'username': user.username or '',
+                        'is_bot': user.is_bot,
+                        'status': admin.status,  # creator, administrator, member
+                        'can_be_edited': getattr(admin, 'can_be_edited', False),
+                        'can_manage_chat': getattr(admin, 'can_manage_chat', False),
+                        'can_delete_messages': getattr(admin, 'can_delete_messages', False),
+                        'can_manage_video_chats': getattr(admin, 'can_manage_video_chats', False),
+                        'can_restrict_members': getattr(admin, 'can_restrict_members', False),
+                        'can_promote_members': getattr(admin, 'can_promote_members', False),
+                        'can_change_info': getattr(admin, 'can_change_info', False),
+                        'can_invite_users': getattr(admin, 'can_invite_users', False),
+                        'can_post_messages': getattr(admin, 'can_post_messages', False),
+                        'can_edit_messages': getattr(admin, 'can_edit_messages', False),
+                        'can_pin_messages': getattr(admin, 'can_pin_messages', False),
+                    }
+                    members_list.append(member_info)
+                    seen_user_ids.add(user.id)
+            
+            logger.info(f"Получено {len(members_list)} участников из администраторов чата {chat_id}")
+            
+        except TelegramError as e:
+            logger.error(f"Ошибка при получении участников чата: {e}")
+            raise
+        
+        return members_list
 

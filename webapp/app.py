@@ -52,34 +52,55 @@ def get_chats():
         init_data = data.get('init_data', '')
         user_id = data.get('user_id')
         
+        if not user_id:
+            return jsonify({
+                'success': False,
+                'error': 'User ID не предоставлен'
+            }), 400
+        
         # Валидация данных (упрощенная)
-        # В продакшене нужно добавить полную валидацию подписи
         if not validate_telegram_webapp_data(init_data):
             logger.warning(f"Невалидные данные от пользователя {user_id}")
-            # В режиме разработки разрешаем запросы без валидации
         
         # Получаем список чатов из хранилища
-        chats = chat_storage.get_all_chats()
+        all_chats = chat_storage.get_all_chats()
         
-        # Обновляем информацию о чатах из Telegram API (синхронно)
+        # Фильтруем только группы (group и supergroup)
+        groups_only = [chat for chat in all_chats if chat['type'] in ['group', 'supergroup']]
+        
+        # Обновляем информацию о чатах и проверяем права
         bot = Bot(token=Config.TOKEN)
-        updated_chats = []
+        from bot.services.chat_service import ChatService
+        chat_service = ChatService(bot)
         
-        async def update_chats():
-            nonlocal updated_chats
-            for chat_data in chats:
+        filtered_chats = []
+        
+        async def filter_chats():
+            nonlocal filtered_chats
+            for chat_data in groups_only:
                 try:
-                    # Пытаемся обновить информацию о чате
-                    updated = await chat_storage.update_chat_info(bot, chat_data['id'])
+                    chat_id = chat_data['id']
+                    
+                    # Проверяем, является ли бот администратором
+                    is_bot_admin = await chat_service.is_bot_admin(chat_id)
+                    if not is_bot_admin:
+                        continue
+                    
+                    # Проверяем, является ли пользователь создателем
+                    is_user_creator = await chat_service.is_user_creator(chat_id, user_id)
+                    if not is_user_creator:
+                        continue
+                    
+                    # Обновляем информацию о чате
+                    updated = await chat_storage.update_chat_info(bot, chat_id)
                     if updated:
-                        updated_chats.append(updated)
+                        filtered_chats.append(updated)
                     else:
-                        # Если не удалось обновить, используем старые данные
-                        updated_chats.append(chat_data)
+                        filtered_chats.append(chat_data)
+                        
                 except TelegramError as e:
-                    logger.warning(f"Не удалось обновить информацию о чате {chat_data['id']}: {e}")
-                    # Используем старые данные
-                    updated_chats.append(chat_data)
+                    logger.warning(f"Не удалось проверить чат {chat_data['id']}: {e}")
+                    continue
         
         # Запускаем async функцию
         try:
@@ -88,30 +109,100 @@ def get_chats():
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
         
-        loop.run_until_complete(update_chats())
+        loop.run_until_complete(filter_chats())
         
-        # Получаем статистику
-        stats = chat_storage.get_stats()
+        # Подсчитываем статистику
+        stats = {
+            'total': len(filtered_chats),
+            'groups': len([c for c in filtered_chats if c['type'] == 'group']),
+            'supergroups': len([c for c in filtered_chats if c['type'] == 'supergroup']),
+            'private': 0,
+            'channels': 0
+        }
         
-        # Сортируем чаты по типу и названию
-        updated_chats.sort(key=lambda x: (x['type'], x['title']))
+        # Сортируем чаты по названию
+        filtered_chats.sort(key=lambda x: x['title'].lower())
         
         return jsonify({
             'success': True,
-            'chats': updated_chats,
+            'chats': filtered_chats,
             'stats': stats
         })
         
     except Exception as e:
         logger.error(f"Ошибка при получении списка чатов: {e}", exc_info=True)
-        # В случае ошибки возвращаем данные из хранилища без обновления
-        chats = chat_storage.get_all_chats()
-        stats = chat_storage.get_stats()
+        return jsonify({
+            'success': False,
+            'error': 'Не удалось загрузить список чатов'
+        }), 500
+
+
+@app.route('/api/chats/<int:chat_id>/members', methods=['POST'])
+def get_chat_members(chat_id):
+    """API endpoint для получения списка участников чата"""
+    import asyncio
+    try:
+        data = request.get_json()
+        user_id = data.get('user_id')
+        
+        if not user_id:
+            return jsonify({
+                'success': False,
+                'error': 'User ID не предоставлен'
+            }), 400
+        
+        bot = Bot(token=Config.TOKEN)
+        from bot.services.chat_service import ChatService
+        chat_service = ChatService(bot)
+        
+        # Проверяем права пользователя и бота
+        async def check_and_get_members():
+            # Проверяем, является ли пользователь создателем
+            is_user_creator = await chat_service.is_user_creator(chat_id, user_id)
+            if not is_user_creator:
+                return None, "Пользователь не является создателем группы"
+            
+            # Проверяем, является ли бот администратором
+            is_bot_admin = await chat_service.is_bot_admin(chat_id)
+            if not is_bot_admin:
+                return None, "Бот не является администратором группы"
+            
+            # Получаем список участников
+            members = await chat_service.get_chat_members_list(chat_id)
+            return members, None
+        
+        # Запускаем async функцию
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+        
+        members, error = loop.run_until_complete(check_and_get_members())
+        
+        if error:
+            return jsonify({
+                'success': False,
+                'error': error
+            }), 403
+        
         return jsonify({
             'success': True,
-            'chats': chats,
-            'stats': stats
+            'members': members
         })
+        
+    except TelegramError as e:
+        logger.error(f"Ошибка Telegram API при получении участников: {e}")
+        return jsonify({
+            'success': False,
+            'error': f'Ошибка Telegram API: {str(e)}'
+        }), 500
+    except Exception as e:
+        logger.error(f"Ошибка при получении участников чата: {e}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': 'Не удалось загрузить список участников'
+        }), 500
 
 
 @app.route('/health')
