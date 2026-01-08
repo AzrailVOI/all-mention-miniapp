@@ -82,7 +82,7 @@ async function loadChats() {
         }
         
         renderStats(data.stats);
-        renderChats(data.chats);
+        renderChats(data.chats, data.info);
         
     } catch (error) {
         console.error('Error loading chats:', error);
@@ -119,16 +119,26 @@ function renderStats(stats) {
 }
 
 // Отображение списка чатов
-function renderChats(chats) {
+function renderChats(chats, infoMessage) {
     if (!chatsContainer) return;
     
     if (!chats || chats.length === 0) {
-        chatsContainer.innerHTML = `
+        let emptyContent = `
             <div class="empty-state">
                 <i data-lucide="message-square" style="width: 48px; height: 48px; opacity: 0.3; margin-bottom: 16px;"></i>
                 <p>Бот еще не добавлен ни в один чат</p>
-            </div>
         `;
+        
+        if (infoMessage) {
+            emptyContent += `
+                <div style="margin-top: 20px; padding: 16px; background: #fafafa; border: 1px solid #e0e0e0; text-align: left; font-size: 13px; line-height: 1.6;">
+                    ${escapeHtml(infoMessage).replace(/\n/g, '<br>')}
+                </div>
+            `;
+        }
+        
+        emptyContent += `</div>`;
+        chatsContainer.innerHTML = emptyContent;
         lucide.createIcons();
         return;
     }

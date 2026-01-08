@@ -21,15 +21,22 @@ class MessageHandler:
     
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Обрабатывает входящие текстовые сообщения"""
-        if not update.message or not update.message.text:
+        if not update.message:
             return
         
-        message_text = update.message.text
         chat = update.message.chat
         chat_id = update.message.chat_id
         
-        # Регистрируем чат в хранилище
+        # ВСЕГДА регистрируем чат в хранилище при любом сообщении
+        # Это критично, так как Telegram Bot API не предоставляет способ получить список всех чатов
         chat_storage.register_chat(chat)
+        logger.debug(f"[MessageHandler] Чат {chat_id} ({chat.type}) зарегистрирован при получении сообщения")
+        
+        # Если нет текста, просто выходим (но чат уже зарегистрирован)
+        if not update.message.text:
+            return
+        
+        message_text = update.message.text
         
         # Проверяем наличие триггера упоминания
         mention_service = MentionService(context.bot)

@@ -47,6 +47,19 @@ def main() -> None:
     application.add_handler(CommandHandler("start", start_command))
     application.add_handler(CommandHandler("chats", chats_command))
     application.add_handler(CommandHandler("register", register_chat_command))
+    
+    # Обработчик всех сообщений для регистрации чатов (важно для получения списка чатов)
+    # Регистрируем чат при ЛЮБОМ сообщении, не только текстовом
+    async def register_chat_from_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        """Регистрирует чат при любом сообщении"""
+        if update.message and update.message.chat:
+            from bot.services.chat_storage_service import chat_storage
+            chat_storage.register_chat(update.message.chat)
+    
+    # Добавляем обработчик для всех сообщений (включая не текстовые)
+    application.add_handler(MessageHandler(filters.ALL & ~filters.COMMAND, register_chat_from_message))
+    
+    # Обработчик текстовых сообщений для упоминаний
     application.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_message)
     )

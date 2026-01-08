@@ -98,10 +98,17 @@ def get_chats():
             nonlocal all_chat_ids, filtered_chats, skipped_not_admin, skipped_not_creator, skipped_not_group
             
             try:
-                # Получаем последние обновления (можно увеличить limit)
-                updates = await bot.get_updates(limit=100, timeout=1)
-                logger.info(f"[API] Получено {len(updates)} обновлений из Telegram")
-                print(f"[API] Получено {len(updates)} обновлений из Telegram")
+                # Пробуем получить обновления с offset=0 для получения всех доступных обновлений
+                # Но это может не сработать, если обновления уже были обработаны
+                try:
+                    updates = await bot.get_updates(offset=0, limit=100, timeout=1)
+                    logger.info(f"[API] Получено {len(updates)} обновлений из Telegram (offset=0)")
+                    print(f"[API] Получено {len(updates)} обновлений из Telegram (offset=0)")
+                except:
+                    # Если не получилось, пробуем без offset
+                    updates = await bot.get_updates(limit=100, timeout=1)
+                    logger.info(f"[API] Получено {len(updates)} обновлений из Telegram (без offset)")
+                    print(f"[API] Получено {len(updates)} обновлений из Telegram (без offset)")
                 
                 # Извлекаем уникальные chat_id из обновлений
                 for update in updates:
@@ -119,13 +126,26 @@ def get_chats():
                 logger.info(f"[API] Найдено {len(all_chat_ids)} уникальных чатов в обновлениях")
                 print(f"[API] Найдено {len(all_chat_ids)} уникальных чатов в обновлениях")
                 
-                # Также добавляем чаты из хранилища (на случай, если их нет в обновлениях)
+                # Также добавляем чаты из хранилища (это основной источник)
                 stored_chats = chat_storage.get_all_chats()
+                logger.info(f"[API] Чатов в хранилище: {len(stored_chats)}")
+                print(f"[API] Чатов в хранилище: {len(stored_chats)}")
+                
                 for stored_chat in stored_chats:
                     all_chat_ids.add(stored_chat['id'])
                 
-                logger.info(f"[API] Всего чатов для проверки (с учетом хранилища): {len(all_chat_ids)}")
-                print(f"[API] Всего чатов для проверки (с учетом хранилища): {len(all_chat_ids)}")
+                logger.info(f"[API] Всего чатов для проверки (обновления + хранилище): {len(all_chat_ids)}")
+                print(f"[API] Всего чатов для проверки (обновления + хранилище): {len(all_chat_ids)}")
+                
+                # Если нет чатов, выводим предупреждение
+                if len(all_chat_ids) == 0:
+                    logger.warning(f"[API] ВНИМАНИЕ: Не найдено чатов ни в обновлениях, ни в хранилище!")
+                    logger.warning(f"[API] Чаты будут появляться автоматически при:")
+                    logger.warning(f"[API] 1. Получении сообщений в группах")
+                    logger.warning(f"[API] 2. Добавлении бота в группы (событие my_chat_member)")
+                    logger.warning(f"[API] 3. Использовании команды /register в группе")
+                    print(f"[API] ВНИМАНИЕ: Не найдено чатов ни в обновлениях, ни в хранилище!")
+                    print(f"[API] Чаты будут появляться автоматически при получении сообщений или событий")
                 
                 # Проверяем каждый чат
                 for chat_id in all_chat_ids:
@@ -220,14 +240,31 @@ def get_chats():
         # Сортируем чаты по названию
         filtered_chats.sort(key=lambda x: x['title'].lower())
         
+        # Добавляем информационное сообщение, если чатов нет
+        info_message = None
+        if len(filtered_chats) == 0 and len(all_chat_ids) == 0:
+            info_message = (
+                "Чаты не найдены. Telegram Bot API не предоставляет способ получить список всех чатов.\n\n"
+                "Чаты будут автоматически регистрироваться при:\n"
+                "• Получении любого сообщения в группе\n"
+                "• Добавлении бота в группу (событие my_chat_member)\n"
+                "• Использовании команды /register в группе\n\n"
+                "Отправьте любое сообщение в группе или используйте /register для регистрации."
+            )
+        
         logger.info(f"[API] GET /api/chats - успешно возвращено {len(filtered_chats)} чатов")
         print(f"[API] GET /api/chats - успешно возвращено {len(filtered_chats)} чатов")
         
-        return jsonify({
+        response_data = {
             'success': True,
             'chats': filtered_chats,
             'stats': stats
-        })
+        }
+        
+        if info_message:
+            response_data['info'] = info_message
+        
+        return jsonify(response_data)
         
     except Exception as e:
         logger.error(f"[API] Ошибка при получении списка чатов: {e}", exc_info=True)
