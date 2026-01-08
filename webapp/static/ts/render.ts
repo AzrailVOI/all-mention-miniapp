@@ -41,7 +41,7 @@ export function renderChats(chats: Chat[] | null, infoMessage: string | null): v
         
         emptyContent += `
             <div style="margin-top: 24px;">
-                <button class="refresh-btn" onclick="window.loadChats()" style="margin: 0 auto;">
+                <button class="refresh-btn" id="refresh-empty-btn" type="button" style="margin: 0 auto;">
                     <i data-lucide="refresh-cw" style="width: 16px; height: 16px; margin-right: 8px;"></i>
                     Обновить список
                 </button>
@@ -51,6 +51,15 @@ export function renderChats(chats: Chat[] | null, infoMessage: string | null): v
         if (window.lucide) {
             window.lucide.createIcons();
         }
+        
+        // Добавляем обработчик для кнопки обновления
+        const refreshBtn = chatsContainer.querySelector('#refresh-empty-btn');
+        if (refreshBtn && window.loadChats) {
+            refreshBtn.addEventListener('click', () => {
+                window.loadChats();
+            });
+        }
+        
         return;
     }
     

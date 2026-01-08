@@ -66,7 +66,20 @@ export function showError(message: string): void {
             <div class="error">
                 <strong>Ошибка:</strong> ${escapeHtml(message)}
             </div>
-            <button class="refresh-btn" onclick="location.reload()">Обновить</button>
+            <button class="refresh-btn" id="refresh-error-btn" type="button">Обновить</button>
         `;
+        
+        // Добавляем обработчик для кнопки обновления
+        const refreshBtn = chatsContainer.querySelector('#refresh-error-btn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+                location.reload();
+            });
+        }
+        
+        // Инициализируем иконки
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
     }
 }

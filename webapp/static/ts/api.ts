@@ -1,9 +1,8 @@
 // API запросы
 import type { ChatListResponse, Chat, ChatStats } from './types';
-import { renderChats } from './render';
 import { renderStats } from './stats';
 import { showToast, showError } from './utils';
-import { setCurrentChats } from './filters';
+import { setCurrentChats, applyFilters } from './filters';
 import { hideLoading, showLoading } from './loading';
 
 const API_URL = '/api/chats';
@@ -57,9 +56,7 @@ export async function loadChats(): Promise<void> {
         
         renderStats(data.stats);
         // Применяем фильтры (которые отобразят чаты)
-        if (window.applyFilters) {
-            window.applyFilters();
-        }
+        applyFilters();
         
     } catch (error) {
         console.error('Error loading chats:', error);
