@@ -4,8 +4,6 @@ from typing import Optional
 from telegram.error import (
     TelegramError,
     BadRequest,
-    Forbidden,
-    NotFound,
     Conflict,
     RetryAfter,
     NetworkError,
@@ -57,20 +55,27 @@ def handle_telegram_error(error: TelegramError, context: Optional[str] = None) -
     """
     context_str = f" [{context}]" if context else ""
     
+    # Invalid token
     if isinstance(error, InvalidToken):
         logger.error(f"Invalid bot token{context_str}: {error}")
         return UnauthorizedError("Неверный токен бота")
     
-    elif isinstance(error, Forbidden):
-        logger.error(f"Access forbidden{context_str}: {error}")
-        return ForbiddenError("Доступ запрещен. Проверьте права бота.")
-    
-    elif isinstance(error, NotFound):
-        if "chat not found" in str(error).lower():
+    # BadRequest: разбираем по тексту (в v20 многие кейсы приходят как BadRequest)
+    if isinstance(error, BadRequest):
+        msg = str(error).lower()
+        
+        # Чат не найден
+        if "chat not found" in msg:
             logger.warning(f"Chat not found{context_str}: {error}")
-            return ChatNotFoundError("Чат не найден")
-        logger.warning(f"Resource not found{context_str}: {error}")
-        return NotFound(f"Ресурс не найден: {error}")
+            return ChatNotFoundError("Чат не найден. Возможно, бот был удален из группы.")
+        
+        # Доступ запрещен / бот кикнут / недостаточно прав
+        if "forbidden" in msg or "bot was kicked" in msg or "not enough rights" in msg:
+            logger.error(f"Access forbidden{context_str}: {error}")
+            return ForbiddenError("Доступ запрещен. Проверьте права бота и статус в чате.")
+        
+        logger.warning(f"Bad request{context_str}: {error}")
+        return TelegramAPIError(f"Неверный запрос: {error}")
     
     elif isinstance(error, ChatMigrated):
         logger.warning(f"Chat migrated{context_str}: {error}")
@@ -85,17 +90,12 @@ def handle_telegram_error(error: TelegramError, context: Optional[str] = None) -
         logger.warning(f"Network error{context_str}: {error}")
         return TelegramAPIError(f"Ошибка сети: {error}")
     
-    elif isinstance(error, Conflict):
+    if isinstance(error, Conflict):
         logger.warning(f"Conflict{context_str}: {error}")
         return TelegramAPIError(f"Конфликт: {error}")
     
-    elif isinstance(error, BadRequest):
-        logger.warning(f"Bad request{context_str}: {error}")
-        return TelegramAPIError(f"Неверный запрос: {error}")
-    
-    else:
-        logger.error(f"Unknown Telegram error{context_str}: {error}", exc_info=True)
-        return TelegramAPIError(f"Ошибка Telegram API: {error}")
+    logger.error(f"Unknown Telegram error{context_str}: {error}", exc_info=True)
+    return TelegramAPIError(f"Ошибка Telegram API: {error}")
 
 
 def get_user_friendly_message(error: TelegramAPIError) -> str:
