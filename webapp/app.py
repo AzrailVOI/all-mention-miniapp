@@ -22,10 +22,41 @@ from bot.utils.async_helpers import run_async_safe
 from bot.utils.batching import batch_process_with_filter
 from webapp.validators import ChatListRequest, ChatMembersRequest, validate_chat_id
 
+try:
+    import sass  # type: ignore
+except ImportError:  # pragma: no cover - опциональная зависимость
+    sass = None
+
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = Config.WEBAPP_SECRET_KEY
+
+
+def _compile_scss() -> None:
+    """
+    Компилирует SCSS в CSS при старте приложения.
+    Если libsass недоступен, просто логируем предупреждение.
+    """
+    if sass is None:
+        logger.warning("SCSS не скомпилирован: пакет 'libsass' не установлен")
+        return
+
+    try:
+        import pathlib
+
+        base_dir = pathlib.Path(__file__).resolve().parent
+        scss_path = base_dir / "static" / "scss" / "style.scss"
+        css_path = base_dir / "static" / "css" / "style.css"
+
+        css = sass.compile(filename=str(scss_path))
+        css_path.write_text(css, encoding="utf-8")
+        logger.info(f"SCSS успешно скомпилирован в {css_path}")
+    except Exception as e:  # pragma: no cover - защитный код
+        logger.error(f"Ошибка компиляции SCSS: {e}", exc_info=True)
+
+
+_compile_scss()
 
 # Метрики производительности
 _metrics = {

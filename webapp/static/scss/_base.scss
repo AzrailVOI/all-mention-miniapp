@@ -1,0 +1,45 @@
+@use "variables" as *;
+@use "mixins" as *;
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: $font-family-base;
+  background: radial-gradient(circle at top, #12141b 0, $color-bg 42%, #020308 100%);
+  color: $color-text;
+  min-height: 100vh;
+  padding: $space-lg;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.container {
+  width: 100%;
+  max-width: 840px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: $space-lg;
+}
+
+body {
+  @include scrollbars;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+

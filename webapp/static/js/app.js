@@ -16,6 +16,9 @@ const statsContainer = document.querySelector('.stats');
 const chatsContainer = document.querySelector('.chat-list');
 const loadingElement = document.querySelector('.loading');
 
+// Состояние отображения статистики
+let statsVisible = false;
+
 // API endpoint
 const API_URL = '/api/chats';
 
@@ -38,6 +41,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
     
+    // Изначально статистика скрыта
+    if (statsContainer) {
+        statsContainer.style.display = 'none';
+    }
+
+    // Тоггл статистики
+    const statsToggle = document.querySelector('.stats-toggle');
+    if (statsToggle && statsContainer) {
+        statsToggle.addEventListener('click', () => {
+            statsVisible = !statsVisible;
+            statsContainer.style.display = statsVisible ? '' : 'none';
+            statsToggle.textContent = statsVisible ? 'Скрыть статистику' : 'Статистика';
+        });
+        // Начальный текст
+        statsToggle.textContent = 'Статистика';
+    }
+
     await loadChats();
     
     // Обработчик кнопки обновления в шапке

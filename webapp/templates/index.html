@@ -18,12 +18,17 @@
                 <h1>Мои чаты</h1>
                 <p>Список чатов, где добавлен бот</p>
             </div>
-            <button class="refresh-btn-header" onclick="loadChats()" title="Обновить список чатов">
-                <i data-lucide="refresh-cw"></i>
-            </button>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button class="stats-toggle" type="button" title="Показать/скрыть статистику">
+                    Статистика
+                </button>
+                <button class="refresh-btn-header" onclick="loadChats()" title="Обновить список чатов">
+                    <i data-lucide="refresh-cw"></i>
+                </button>
+            </div>
         </div>
         
-        <div class="stats"></div>
+        <div class="stats" style="display: none;"></div>
         
         <div class="chats-section">
             <div class="section-title">

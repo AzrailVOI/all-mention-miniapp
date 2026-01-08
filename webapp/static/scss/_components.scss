@@ -1,0 +1,480 @@
+@use "variables" as *;
+@use "mixins" as *;
+
+.refresh-btn-header,
+.back-btn {
+  @include button-reset;
+  width: 42px;
+  height: 42px;
+  border-radius: $radius-full;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: radial-gradient(circle at top, rgba(255, 255, 255, 0.18), transparent 65%),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.85));
+  box-shadow: $shadow-subtle;
+  transition: transform $transition-fast, box-shadow $transition-fast,
+    border-color $transition-fast, background $transition-fast;
+
+  i {
+    width: 18px;
+    height: 18px;
+    color: $color-accent-soft;
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    border-color: $color-accent;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.75);
+  }
+
+  &:active {
+    transform: translateY(1px) scale(0.98);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.75);
+  }
+}
+
+.stats {
+  .stat-card {
+    @include glass-panel($space-md);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.88));
+    border-radius: $radius-md;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        circle at top right,
+        rgba(255, 255, 255, 0.18),
+        transparent 70%
+      );
+      opacity: 0.7;
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+
+    .stat-icon {
+      margin-bottom: $space-sm;
+
+      i {
+        width: 22px;
+        height: 22px;
+        color: $color-accent;
+      }
+    }
+
+    .stat-value {
+      font-size: 30px;
+      font-weight: 650;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .stat-label {
+      margin-top: $space-xs;
+      font-size: $font-size-xs;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: $color-text-soft;
+    }
+  }
+}
+
+.chat-list {
+  display: flex;
+  flex-direction: column;
+  gap: $space-sm;
+  margin-top: $space-md;
+}
+
+.chat-item {
+  display: flex;
+  align-items: center;
+  padding: $space-md;
+  background: linear-gradient(120deg, $color-bg-soft, #06080d);
+  border-radius: $radius-md;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: transform $transition-base, box-shadow $transition-base, border-color $transition-base,
+    background $transition-base;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      120deg,
+      rgba(255, 255, 255, 0.09),
+      transparent 40%,
+      transparent 60%,
+      rgba(255, 255, 255, 0.05)
+    );
+    mix-blend-mode: soft-light;
+    opacity: 0;
+    transition: opacity $transition-base;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.75);
+    border-color: rgba(255, 255, 255, 0.28);
+
+    &::before {
+      opacity: 1;
+    }
+  }
+}
+
+.chat-avatar,
+.member-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: $radius-full;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-right: $space-md;
+  background: radial-gradient(circle at top, #272d37, #05070b);
+
+  img,
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.chat-info {
+  flex: 1;
+  min-width: 0;
+
+  .chat-name {
+    font-size: $font-size-md;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  .chat-details {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: $space-sm;
+    font-size: $font-size-xs;
+    color: $color-text-soft;
+  }
+}
+
+.chat-actions {
+  display: flex;
+  align-items: center;
+  gap: $space-xs;
+}
+
+.chat-type {
+  @include pill;
+  border-color: rgba(255, 255, 255, 0.38);
+}
+
+.chat-delete-btn {
+  @include button-reset;
+  width: 32px;
+  height: 32px;
+  border-radius: $radius-full;
+  border: 1px solid rgba($color-danger, 0.75);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: $color-danger;
+  background: radial-gradient(circle at top, rgba($color-danger, 0.55), transparent 65%);
+  transition: all $transition-fast;
+
+  i {
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    background: $color-danger-soft;
+    color: $color-accent;
+    box-shadow: 0 8px 20px rgba($color-danger, 0.5);
+  }
+
+  &:active {
+    transform: translateY(1px) scale(0.97);
+  }
+}
+
+.filters-container {
+  margin-bottom: $space-md;
+
+  .search-container {
+    display: flex;
+    gap: $space-sm;
+    margin-bottom: $space-sm;
+  }
+
+  .filter-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-sm;
+  }
+}
+
+.search-input,
+.filter-select {
+  background: rgba(7, 9, 14, 0.85);
+  border-radius: $radius-sm;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: $color-text;
+  font-size: $font-size-sm;
+  padding: $space-sm $space-md;
+  transition: border-color $transition-fast, background $transition-fast;
+
+  &:focus {
+    @include focus-ring;
+  }
+}
+
+.search-input {
+  flex: 1;
+}
+
+.search-btn,
+.refresh-btn {
+  @include button-reset;
+  border-radius: $radius-sm;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  padding: $space-sm $space-md;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: radial-gradient(circle at top, rgba(255, 255, 255, 0.15), transparent 70%),
+    linear-gradient(to right, rgba(255, 255, 255, 0.14), rgba(0, 0, 0, 0.9));
+  color: $color-text;
+  font-size: $font-size-sm;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  i {
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover {
+    border-color: $color-accent;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-md;
+  padding: $space-xl;
+  color: $color-text-soft;
+
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border-radius: $radius-full;
+    border: 3px solid rgba(255, 255, 255, 0.12);
+    border-top-color: $color-accent;
+    animation: spin 1s linear infinite;
+  }
+}
+
+.members-list {
+  display: flex;
+  flex-direction: column;
+  gap: $space-xs;
+  margin-top: $space-md;
+}
+
+.member-item {
+  display: flex;
+  align-items: center;
+  padding: $space-md;
+  border-radius: $radius-md;
+  background: linear-gradient(120deg, $color-bg-soft, #050609);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all $transition-fast;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+  }
+}
+
+.member-info {
+  flex: 1;
+
+  .member-name {
+    font-size: $font-size-md;
+    font-weight: 600;
+  }
+
+  .member-details {
+    margin-top: 2px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-xs;
+    font-size: $font-size-xs;
+    color: $color-text-soft;
+  }
+}
+
+.member-badge {
+  @include pill;
+
+  &.admin,
+  &.creator,
+  &.bot {
+    border-color: rgba(255, 255, 255, 0.7);
+  }
+}
+
+.member-profile-btn {
+  @include button-reset;
+  width: 34px;
+  height: 34px;
+  border-radius: $radius-full;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  i {
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.18);
+  }
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: $space-md;
+  margin-top: $space-md;
+}
+
+.pagination-btn {
+  @include button-reset;
+  border-radius: $radius-full;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  padding: 8px 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: $font-size-xs;
+  color: $color-text-soft;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover:not(:disabled) {
+    color: $color-accent;
+    border-color: $color-accent;
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+}
+
+.pagination-info {
+  font-size: $font-size-xs;
+  color: $color-text-soft;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.error {
+  margin: $space-md 0;
+  padding: $space-md;
+  border-radius: $radius-md;
+  border: 1px solid rgba($color-danger, 0.5);
+  background: radial-gradient(circle at top, rgba($color-danger, 0.35), #13060a);
+}
+
+.empty-state {
+  padding: $space-2xl $space-lg;
+  text-align: center;
+  color: $color-text-soft;
+}
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(110%);
+  padding: $space-md $space-xl;
+  border-radius: $radius-lg;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  max-width: 92%;
+  color: $color-text;
+  background: rgba(0, 0, 0, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: $shadow-soft;
+  opacity: 0;
+  transition: all $transition-base;
+  z-index: 9999;
+
+  &.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  &.toast-success {
+    border-color: rgba($color-success, 0.7);
+  }
+
+  &.toast-error {
+    border-color: rgba($color-danger, 0.7);
+  }
+
+  &.toast-warning {
+    border-color: rgba($color-warning, 0.7);
+  }
+
+  &.toast-info {
+    border-color: rgba($color-info, 0.7);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
