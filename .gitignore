@@ -20,7 +20,6 @@ wheels/
 .installed.cfg
 *.egg
 node_modules/
-webapp/static/js/
 # Virtual Environment
 venv/
 ENV/
