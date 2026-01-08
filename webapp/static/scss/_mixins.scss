@@ -4,18 +4,20 @@
   background: var(--color-bg-elevated);
   border-radius: 0;
   border: none;
-  box-shadow: $shadow-subtle;
+  box-shadow: $shadow-sm;
   padding: $padding;
 }
 
 @mixin pill {
   border-radius: 0;
-  padding: 4px 10px;
+  padding: 3px $space-sm;
   font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.06em;
+  line-height: $line-height-normal;
   border: none;
-  background: var(--color-bg-soft);
+  background: var(--color-bg-elevated);
   color: var(--color-text);
 }
 

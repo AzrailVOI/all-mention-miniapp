@@ -30,9 +30,16 @@ $color-accent: $color-accent-dark;
 $color-hover: $color-hover-dark;
 $color-border: $color-accent-dark; // Для обводки функциональных элементов
 
-// Тени (минимальные)
-$shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.12);
-$shadow-subtle: 0 1px 2px rgba(0, 0, 0, 0.08);
+// Тени (по стандартам Material Design / HIG)
+$shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+$shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+
+// Для темной темы - более мягкие тени
+$shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.15);
+$shadow-subtle: 0 1px 4px rgba(0, 0, 0, 0.1);
 $backdrop-blur: none;
 
 // Радиусы (линейный стиль - только прямые углы)
@@ -42,13 +49,14 @@ $radius-md: 0;
 $radius-lg: 0;
 $radius-full: 0;
 
-// Отступы
+// Отступы (8px grid system)
 $space-xs: 4px;
 $space-sm: 8px;
-$space-md: 12px;
-$space-lg: 16px;
-$space-xl: 24px;
-$space-2xl: 32px;
+$space-md: 16px;
+$space-lg: 24px;
+$space-xl: 32px;
+$space-2xl: 48px;
+$space-3xl: 64px;
 
 // Типографика
 // Темная тема - более строгий, геометричный шрифт
@@ -60,13 +68,30 @@ $font-family-light: "Inter", "SF Pro Text", system-ui, -apple-system,
 // Базовый шрифт (для SCSS переменных, будет переопределен через CSS)
 $font-family-base: $font-family-dark;
 
+// Типографика (по стандартам)
 $font-size-xs: 11px;
 $font-size-sm: 13px;
 $font-size-md: 15px;
-$font-size-lg: 20px;
-$font-size-xl: 28px;
+$font-size-lg: 18px;
+$font-size-xl: 24px;
+$font-size-2xl: 32px;
 
-// Прочее
-$transition-fast: 0.18s ease-out;
-$transition-base: 0.24s ease-out;
+// Line heights (по стандартам типографики)
+$line-height-tight: 1.2;
+$line-height-normal: 1.5;
+$line-height-relaxed: 1.75;
+
+// Font weights
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// Анимации (по стандартам Material Design)
+$transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+$ease-out: cubic-bezier(0.4, 0, 0.2, 1);
+$ease-in: cubic-bezier(0.4, 0, 1, 1);
+$ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 

@@ -3,8 +3,8 @@
 
 .theme-toggle {
   @include button-reset;
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   border-radius: 0;
   border: 1px solid var(--color-border);
   display: inline-flex;
@@ -12,30 +12,38 @@
   justify-content: center;
   cursor: pointer;
   background: var(--color-bg-soft);
-  transition: transform $transition-fast, background $transition-fast, border-color $transition-fast;
+  transition: transform $transition-fast, background $transition-fast, border-color $transition-fast, box-shadow $transition-fast;
+  box-shadow: $shadow-xs;
 
   i {
     width: 18px;
     height: 18px;
     color: var(--color-text);
+    transition: transform $transition-fast;
   }
 
   &:hover {
     transform: translateY(-1px);
     background: var(--color-hover);
     border-color: var(--color-accent);
+    box-shadow: $shadow-sm;
+
+    i {
+      transform: rotate(15deg);
+    }
   }
 
   &:active {
-    transform: translateY(1px) scale(0.98);
+    transform: translateY(0) scale(0.96);
+    box-shadow: $shadow-xs;
   }
 }
 
 .refresh-btn-header,
 .back-btn {
   @include button-reset;
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   border-radius: 0;
   border: 1px solid var(--color-border);
   display: inline-flex;
@@ -43,22 +51,30 @@
   justify-content: center;
   cursor: pointer;
   background: var(--color-bg-soft);
-  transition: transform $transition-fast, background $transition-fast, border-color $transition-fast;
+  transition: transform $transition-fast, background $transition-fast, border-color $transition-fast, box-shadow $transition-fast;
+  box-shadow: $shadow-xs;
 
   i {
     width: 18px;
     height: 18px;
     color: var(--color-text);
+    transition: transform $transition-base;
   }
 
   &:hover {
     transform: translateY(-1px);
     background: var(--color-hover);
     border-color: var(--color-accent);
+    box-shadow: $shadow-sm;
+
+    i {
+      transform: rotate(180deg);
+    }
   }
 
   &:active {
-    transform: translateY(1px) scale(0.98);
+    transform: translateY(0) scale(0.96);
+    box-shadow: $shadow-xs;
   }
 }
 
@@ -70,18 +86,28 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: $space-xs;
   background: var(--color-bg-soft);
   color: var(--color-text);
   font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.06em;
+  line-height: $line-height-normal;
   cursor: pointer;
   transition: all $transition-fast;
+  box-shadow: $shadow-xs;
 
   &:hover {
     background: var(--color-hover);
     border-color: var(--color-accent);
+    box-shadow: $shadow-sm;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: $shadow-xs;
   }
 }
 
@@ -109,19 +135,22 @@
     }
 
     .stat-value {
-      font-size: 30px;
-      font-weight: 650;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      font-size: $font-size-2xl;
+      font-weight: $font-weight-bold;
+      letter-spacing: -0.02em;
+      line-height: $line-height-tight;
       color: var(--color-text);
+      margin-bottom: $space-xs;
     }
 
     .stat-label {
-      margin-top: $space-xs;
+      margin-top: 0;
       font-size: $font-size-xs;
-      letter-spacing: 0.14em;
+      font-weight: $font-weight-medium;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: var(--color-text-soft);
+      color: var(--color-text-muted);
+      line-height: $line-height-normal;
     }
   }
 }
@@ -129,7 +158,7 @@
 .chat-list {
   display: flex;
   flex-direction: column;
-  gap: $space-sm;
+  gap: $space-md;
   margin-top: $space-md;
 }
 
@@ -141,12 +170,19 @@
   border-radius: 0;
   border: 1px solid var(--color-border);
   cursor: pointer;
-  transition: transform $transition-base, background $transition-base, border-color $transition-base;
+  transition: transform $transition-fast, background $transition-fast, border-color $transition-fast, box-shadow $transition-fast;
+  box-shadow: $shadow-xs;
 
   &:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px);
     background: var(--color-hover);
     border-color: var(--color-accent);
+    box-shadow: $shadow-md;
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: $shadow-xs;
   }
 }
 
@@ -177,10 +213,10 @@
 
   .chat-name {
     font-size: $font-size-md;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    margin-bottom: 2px;
+    font-weight: $font-weight-semibold;
+    letter-spacing: -0.01em;
+    line-height: $line-height-tight;
+    margin-bottom: $space-xs;
     color: var(--color-text);
   }
 
@@ -190,7 +226,9 @@
     flex-wrap: wrap;
     gap: $space-sm;
     font-size: $font-size-xs;
-    color: var(--color-text-soft);
+    font-weight: $font-weight-normal;
+    line-height: $line-height-normal;
+    color: var(--color-text-muted);
   }
 }
 
@@ -203,8 +241,10 @@
 .chat-type {
   @include pill;
   border: none;
-  background: var(--color-bg-soft);
+  background: var(--color-bg-elevated);
   color: var(--color-text);
+  font-weight: $font-weight-medium;
+  padding: 3px $space-sm;
 }
 
 .chat-delete-btn {
@@ -220,6 +260,7 @@
   color: var(--color-text);
   background: var(--color-bg-soft);
   transition: all $transition-fast;
+  box-shadow: $shadow-xs;
 
   i {
     width: 16px;
@@ -229,10 +270,13 @@
   &:hover {
     background: var(--color-hover);
     border-color: var(--color-accent);
+    box-shadow: $shadow-sm;
+    transform: translateY(-1px);
   }
 
   &:active {
-    transform: translateY(1px) scale(0.97);
+    transform: translateY(0) scale(0.95);
+    box-shadow: $shadow-xs;
   }
 }
 
@@ -254,17 +298,27 @@
 
 .search-input,
 .filter-select {
-  background: var(--color-bg-soft);
+  background: var(--color-bg-elevated);
   border-radius: 0;
   border: 1px solid var(--color-border);
   color: var(--color-text);
   font-size: $font-size-sm;
+  font-weight: $font-weight-normal;
+  line-height: $line-height-normal;
   padding: $space-sm $space-md;
-  transition: background $transition-fast, border-color $transition-fast;
+  transition: background $transition-fast, border-color $transition-fast, box-shadow $transition-fast;
+  box-shadow: $shadow-xs;
+
+  &::placeholder {
+    color: var(--color-text-muted);
+    font-weight: $font-weight-normal;
+  }
 
   &:focus {
     border-color: var(--color-accent);
     outline: none;
+    background: var(--color-bg-soft);
+    box-shadow: $shadow-sm;
   }
 }
 
@@ -281,14 +335,17 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: $space-xs;
   background: var(--color-bg-soft);
   color: var(--color-text);
   font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.06em;
+  line-height: $line-height-normal;
   cursor: pointer;
   transition: all $transition-fast;
+  box-shadow: $shadow-xs;
 
   i {
     width: 18px;
@@ -299,10 +356,12 @@
     transform: translateY(-1px);
     background: var(--color-hover);
     border-color: var(--color-accent);
+    box-shadow: $shadow-sm;
   }
 
   &:active {
-    transform: translateY(1px);
+    transform: translateY(0);
+    box-shadow: $shadow-xs;
   }
 }
 
@@ -311,10 +370,14 @@
   flex-direction: column;
   align-items: center;
   gap: $space-md;
-  padding: $space-xl;
+  padding: $space-2xl;
   background: var(--color-bg-elevated);
-  color: var(--color-text-soft);
+  color: var(--color-text-muted);
   border: none;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-normal;
+  line-height: $line-height-normal;
+  box-shadow: $shadow-sm;
 
   .loading-spinner {
     width: 40px;
@@ -329,7 +392,7 @@
 .members-list {
   display: flex;
   flex-direction: column;
-  gap: $space-xs;
+  gap: $space-sm;
   margin-top: $space-md;
 }
 
@@ -342,11 +405,18 @@
   border: 1px solid var(--color-border);
   cursor: pointer;
   transition: all $transition-fast;
+  box-shadow: $shadow-xs;
 
   &:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px);
     background: var(--color-hover);
     border-color: var(--color-accent);
+    box-shadow: $shadow-md;
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: $shadow-xs;
   }
 }
 
@@ -355,25 +425,31 @@
 
   .member-name {
     font-size: $font-size-md;
-    font-weight: 600;
+    font-weight: $font-weight-semibold;
+    line-height: $line-height-tight;
     color: var(--color-text);
+    margin-bottom: $space-xs;
   }
 
   .member-details {
-    margin-top: 2px;
+    margin-top: 0;
     display: flex;
     flex-wrap: wrap;
     gap: $space-xs;
     font-size: $font-size-xs;
-    color: var(--color-text-soft);
+    font-weight: $font-weight-normal;
+    line-height: $line-height-normal;
+    color: var(--color-text-muted);
   }
 }
 
 .member-badge {
   @include pill;
   border: none;
-  background: var(--color-bg-soft);
+  background: var(--color-bg-elevated);
   color: var(--color-text);
+  font-weight: $font-weight-medium;
+  padding: 3px $space-sm;
 
   &.admin,
   &.creator,
@@ -384,8 +460,8 @@
 
 .member-profile-btn {
   @include button-reset;
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   border-radius: 0;
   border: 1px solid var(--color-border);
   display: inline-flex;
@@ -394,6 +470,7 @@
   cursor: pointer;
   background: var(--color-bg-soft);
   transition: all $transition-fast;
+  box-shadow: $shadow-xs;
 
   i {
     width: 16px;
@@ -403,6 +480,13 @@
   &:hover {
     background: var(--color-hover);
     border-color: var(--color-accent);
+    box-shadow: $shadow-sm;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.95);
+    box-shadow: $shadow-xs;
   }
 }
 
@@ -418,22 +502,32 @@
   @include button-reset;
   border-radius: 0;
   border: 1px solid var(--color-border);
-  padding: 8px 18px;
+  padding: $space-sm $space-md;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: $space-xs;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.06em;
   font-size: $font-size-xs;
-  color: var(--color-text-soft);
+  font-weight: $font-weight-medium;
+  line-height: $line-height-normal;
+  color: var(--color-text);
   background: var(--color-bg-soft);
   cursor: pointer;
   transition: all $transition-fast;
+  box-shadow: $shadow-xs;
 
   &:hover:not(:disabled) {
     color: var(--color-accent);
     background: var(--color-hover);
     border-color: var(--color-accent);
+    box-shadow: $shadow-sm;
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: $shadow-xs;
   }
 
   &:disabled {
@@ -444,9 +538,11 @@
 
 .pagination-info {
   font-size: $font-size-xs;
-  color: var(--color-text-soft);
-  letter-spacing: 0.14em;
+  font-weight: $font-weight-medium;
+  color: var(--color-text-muted);
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+  line-height: $line-height-normal;
 }
 
 .error {
@@ -456,33 +552,43 @@
   border: none;
   background: var(--color-bg-elevated);
   color: var(--color-text);
+  font-size: $font-size-sm;
+  font-weight: $font-weight-normal;
+  line-height: $line-height-relaxed;
+  box-shadow: $shadow-sm;
 }
 
 .empty-state {
-  padding: $space-2xl $space-lg;
+  padding: $space-3xl $space-lg;
   text-align: center;
   background: var(--color-bg-elevated);
-  color: var(--color-text-soft);
+  color: var(--color-text-muted);
   border: none;
+  font-size: $font-size-md;
+  font-weight: $font-weight-normal;
+  line-height: $line-height-relaxed;
+  box-shadow: $shadow-sm;
 }
 
 .toast {
   position: fixed;
-  bottom: 20px;
+  bottom: $space-lg;
   left: 50%;
   transform: translateX(-50%) translateY(110%);
-  padding: $space-md $space-xl;
+  padding: $space-md $space-lg;
   border-radius: 0;
   font-size: $font-size-sm;
-  font-weight: 500;
+  font-weight: $font-weight-medium;
+  line-height: $line-height-normal;
   max-width: 92%;
   color: var(--color-text);
   background: var(--color-bg-elevated);
   border: none;
-  box-shadow: $shadow-soft;
+  box-shadow: $shadow-lg;
   opacity: 0;
   transition: all $transition-base;
   z-index: 9999;
+  letter-spacing: 0.01em;
 
   &.show {
     opacity: 1;

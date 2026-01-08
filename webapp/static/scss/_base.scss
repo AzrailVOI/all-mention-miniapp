@@ -50,7 +50,10 @@ body {
   display: flex;
   justify-content: center;
   align-items: stretch;
-  transition: background-color 0.2s ease, color 0.2s ease, font-family 0.2s ease;
+  line-height: $line-height-normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color $transition-base, color $transition-base, font-family $transition-base;
 }
 
 .container {
@@ -59,7 +62,7 @@ body {
   margin: auto;
   display: flex;
   flex-direction: column;
-  gap: $space-lg;
+  gap: $space-xl;
 }
 
 body {
