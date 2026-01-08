@@ -4,7 +4,7 @@ import threading
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
 
 from bot.config import Config
-from bot.handlers.commands import start_command, chats_command
+from bot.handlers.commands import start_command, chats_command, register_chat_command
 from bot.handlers.messages import handle_text_message
 from bot.handlers.chat_events import handle_chat_member_update, handle_my_chat_member_update
 
@@ -46,6 +46,7 @@ def main() -> None:
     # Регистрируем обработчики
     application.add_handler(CommandHandler("start", start_command))
     application.add_handler(CommandHandler("chats", chats_command))
+    application.add_handler(CommandHandler("register", register_chat_command))
     application.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_message)
     )

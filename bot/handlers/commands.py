@@ -71,3 +71,22 @@ async def chats_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
             text="Команда /chats доступна только в приватном чате с ботом."
         )
 
+
+async def register_chat_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Обработчик команды /register для регистрации текущего чата"""
+    chat = update.effective_chat
+    
+    # Регистрируем чат
+    chat_storage.register_chat(chat)
+    
+    if chat.type in ["group", "supergroup"]:
+        await context.bot.send_message(
+            chat_id=chat.id,
+            text=f"Чат '{chat.title or 'Без названия'}' зарегистрирован! Теперь он будет отображаться в Mini App."
+        )
+    else:
+        await context.bot.send_message(
+            chat_id=chat.id,
+            text="Эта команда работает только в группах и супергруппах."
+        )
+

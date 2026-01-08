@@ -59,7 +59,7 @@ def add_no_cache_headers(response):
 
 @app.route('/api/chats', methods=['POST'])
 def get_chats():
-    """API endpoint для получения списка чатов"""
+    """API endpoint для получения списка чатов напрямую из Telegram API"""
     import asyncio
     try:
         data = request.get_json()
@@ -77,81 +77,122 @@ def get_chats():
                 'error': 'User ID не предоставлен'
             }), 400
         
-        # Валидация данных (упрощенная)
+        # Валидация данных Mini App
         if not validate_telegram_webapp_data(init_data):
             logger.warning(f"[API] Невалидные данные от пользователя {user_id}")
             print(f"[API] Невалидные данные от пользователя {user_id}")
         
-        # Получаем список чатов из хранилища
-        all_chats = chat_storage.get_all_chats()
-        logger.info(f"[API] Всего чатов в хранилище: {len(all_chats)}")
-        print(f"[API] Всего чатов в хранилище: {len(all_chats)}")
-        
-        if len(all_chats) > 0:
-            logger.info(f"[API] Типы чатов: {[c['type'] for c in all_chats]}")
-            print(f"[API] Типы чатов: {[c['type'] for c in all_chats]}")
-        
-        # Фильтруем только группы (group и supergroup)
-        groups_only = [chat for chat in all_chats if chat['type'] in ['group', 'supergroup']]
-        logger.info(f"[API] Групп после фильтрации по типу: {len(groups_only)}")
-        print(f"[API] Групп после фильтрации по типу: {len(groups_only)}")
-        
-        # Обновляем информацию о чатах и проверяем права
         bot = Bot(token=Config.TOKEN)
         from bot.services.chat_service import ChatService
         chat_service = ChatService(bot)
         
+        # Получаем все чаты из Telegram API через getUpdates
+        # Извлекаем уникальные chat_id из последних обновлений
+        all_chat_ids = set()
         filtered_chats = []
         skipped_not_admin = 0
         skipped_not_creator = 0
+        skipped_not_group = 0
         
-        async def filter_chats():
-            nonlocal filtered_chats, skipped_not_admin, skipped_not_creator
-            for chat_data in groups_only:
-                try:
-                    chat_id = chat_data['id']
-                    chat_title = chat_data.get('title', 'Без названия')
-                    
-                    logger.info(f"[API] Проверка чата {chat_id} ({chat_title})")
-                    print(f"[API] Проверка чата {chat_id} ({chat_title})")
-                    
-                    # Проверяем, является ли бот администратором
-                    is_bot_admin = await chat_service.is_bot_admin(chat_id)
-                    logger.info(f"[API] Чат {chat_id}: бот админ = {is_bot_admin}")
-                    print(f"[API] Чат {chat_id}: бот админ = {is_bot_admin}")
-                    
-                    if not is_bot_admin:
-                        skipped_not_admin += 1
-                        logger.warning(f"[API] Чат {chat_id} пропущен: бот не является администратором")
-                        print(f"[API] Чат {chat_id} пропущен: бот не является администратором")
-                        continue
-                    
-                    # Проверяем, является ли пользователь создателем
-                    is_user_creator = await chat_service.is_user_creator(chat_id, user_id)
-                    logger.info(f"[API] Чат {chat_id}: пользователь {user_id} создатель = {is_user_creator}")
-                    print(f"[API] Чат {chat_id}: пользователь {user_id} создатель = {is_user_creator}")
-                    
-                    if not is_user_creator:
-                        skipped_not_creator += 1
-                        logger.warning(f"[API] Чат {chat_id} пропущен: пользователь {user_id} не является создателем")
-                        print(f"[API] Чат {chat_id} пропущен: пользователь {user_id} не является создателем")
-                        continue
-                    
-                    # Обновляем информацию о чате
-                    updated = await chat_storage.update_chat_info(bot, chat_id)
-                    if updated:
-                        filtered_chats.append(updated)
+        async def get_chats_from_telegram():
+            nonlocal all_chat_ids, filtered_chats, skipped_not_admin, skipped_not_creator, skipped_not_group
+            
+            try:
+                # Получаем последние обновления (можно увеличить limit)
+                updates = await bot.get_updates(limit=100, timeout=1)
+                logger.info(f"[API] Получено {len(updates)} обновлений из Telegram")
+                print(f"[API] Получено {len(updates)} обновлений из Telegram")
+                
+                # Извлекаем уникальные chat_id из обновлений
+                for update in updates:
+                    if update.message and update.message.chat:
+                        all_chat_ids.add(update.message.chat.id)
+                    if update.channel_post and update.channel_post.chat:
+                        all_chat_ids.add(update.channel_post.chat.id)
+                    if update.edited_message and update.edited_message.chat:
+                        all_chat_ids.add(update.edited_message.chat.id)
+                    if update.chat_member and update.chat_member.chat:
+                        all_chat_ids.add(update.chat_member.chat.id)
+                    if update.my_chat_member and update.my_chat_member.chat:
+                        all_chat_ids.add(update.my_chat_member.chat.id)
+                
+                logger.info(f"[API] Найдено {len(all_chat_ids)} уникальных чатов в обновлениях")
+                print(f"[API] Найдено {len(all_chat_ids)} уникальных чатов в обновлениях")
+                
+                # Также добавляем чаты из хранилища (на случай, если их нет в обновлениях)
+                stored_chats = chat_storage.get_all_chats()
+                for stored_chat in stored_chats:
+                    all_chat_ids.add(stored_chat['id'])
+                
+                logger.info(f"[API] Всего чатов для проверки (с учетом хранилища): {len(all_chat_ids)}")
+                print(f"[API] Всего чатов для проверки (с учетом хранилища): {len(all_chat_ids)}")
+                
+                # Проверяем каждый чат
+                for chat_id in all_chat_ids:
+                    try:
+                        # Получаем информацию о чате
+                        chat = await bot.get_chat(chat_id)
+                        
+                        # Пропускаем, если это не группа или супергруппа
+                        if chat.type not in ['group', 'supergroup']:
+                            skipped_not_group += 1
+                            continue
+                        
+                        chat_title = chat.title or 'Без названия'
+                        logger.info(f"[API] Проверка чата {chat_id} ({chat_title}, {chat.type})")
+                        print(f"[API] Проверка чата {chat_id} ({chat_title}, {chat.type})")
+                        
+                        # Проверяем, является ли бот администратором
+                        is_bot_admin = await chat_service.is_bot_admin(chat_id)
+                        logger.info(f"[API] Чат {chat_id}: бот админ = {is_bot_admin}")
+                        print(f"[API] Чат {chat_id}: бот админ = {is_bot_admin}")
+                        
+                        if not is_bot_admin:
+                            skipped_not_admin += 1
+                            logger.warning(f"[API] Чат {chat_id} пропущен: бот не является администратором")
+                            print(f"[API] Чат {chat_id} пропущен: бот не является администратором")
+                            continue
+                        
+                        # Проверяем, является ли пользователь создателем
+                        is_user_creator = await chat_service.is_user_creator(chat_id, user_id)
+                        logger.info(f"[API] Чат {chat_id}: пользователь {user_id} создатель = {is_user_creator}")
+                        print(f"[API] Чат {chat_id}: пользователь {user_id} создатель = {is_user_creator}")
+                        
+                        if not is_user_creator:
+                            skipped_not_creator += 1
+                            logger.warning(f"[API] Чат {chat_id} пропущен: пользователь {user_id} не является создателем")
+                            print(f"[API] Чат {chat_id} пропущен: пользователь {user_id} не является создателем")
+                            continue
+                        
+                        # Формируем данные чата
+                        chat_data = {
+                            'id': chat.id,
+                            'title': chat.title or 'Без названия',
+                            'type': chat.type,
+                            'username': getattr(chat, 'username', None),
+                            'members_count': getattr(chat, 'members_count', None)
+                        }
+                        
+                        filtered_chats.append(chat_data)
+                        
+                        # Сохраняем в хранилище
+                        chat_storage.register_chat(chat)
+                        
                         logger.info(f"[API] Чат {chat_id} добавлен в результат")
                         print(f"[API] Чат {chat_id} добавлен в результат")
-                    else:
-                        filtered_chats.append(chat_data)
-                        logger.info(f"[API] Чат {chat_id} добавлен в результат (без обновления)")
-                        print(f"[API] Чат {chat_id} добавлен в результат (без обновления)")
                         
-                except TelegramError as e:
-                    logger.error(f"[API] Ошибка при проверке чата {chat_data.get('id', 'unknown')}: {e}")
-                    print(f"[API] Ошибка при проверке чата {chat_data.get('id', 'unknown')}: {e}")
-                    continue
+                    except TelegramError as e:
+                        # Игнорируем ошибки доступа к чатам
+                        logger.debug(f"[API] Не удалось получить информацию о чате {chat_id}: {e}")
+                        continue
+                    except Exception as e:
+                        logger.error(f"[API] Ошибка при обработке чата {chat_id}: {e}")
+                        print(f"[API] Ошибка при обработке чата {chat_id}: {e}")
+                        continue
+                        
+            except Exception as e:
+                logger.error(f"[API] Ошибка при получении обновлений: {e}")
+                print(f"[API] Ошибка при получении обновлений: {e}")
         
         # Запускаем async функцию
         try:
@@ -160,12 +201,12 @@ def get_chats():
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
         
-        loop.run_until_complete(filter_chats())
+        loop.run_until_complete(get_chats_from_telegram())
         
         logger.info(f"[API] Результат фильтрации: {len(filtered_chats)} чатов")
-        logger.info(f"[API] Пропущено (бот не админ): {skipped_not_admin}, (пользователь не создатель): {skipped_not_creator}")
+        logger.info(f"[API] Пропущено (не группа): {skipped_not_group}, (бот не админ): {skipped_not_admin}, (пользователь не создатель): {skipped_not_creator}")
         print(f"[API] Результат фильтрации: {len(filtered_chats)} чатов")
-        print(f"[API] Пропущено (бот не админ): {skipped_not_admin}, (пользователь не создатель): {skipped_not_creator}")
+        print(f"[API] Пропущено (не группа): {skipped_not_group}, (бот не админ): {skipped_not_admin}, (пользователь не создатель): {skipped_not_creator}")
         
         # Подсчитываем статистику
         stats = {
