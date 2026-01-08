@@ -9,6 +9,8 @@ from bot.services.chat_service import ChatService
 from bot.services.mention_service import MentionService
 from bot.services.chat_storage_service import chat_storage
 from bot.config import Config
+from bot.constants import GROUP_CHAT_TYPES
+from bot.utils.errors import handle_telegram_error, get_user_friendly_message
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +31,10 @@ class MessageHandler:
         
         # ВСЕГДА регистрируем чат в хранилище при любом сообщении
         # Это критично, так как Telegram Bot API не предоставляет способ получить список всех чатов
-        chat_storage.register_chat(chat)
+        try:
+            chat_storage.register_chat(chat)
+        except Exception as e:
+            logger.error(f"Ошибка при регистрации чата {chat_id}: {e}", exc_info=True)
         logger.debug(f"[MessageHandler] Чат {chat_id} ({chat.type}) зарегистрирован при получении сообщения")
         
         # Если нет текста, просто выходим (но чат уже зарегистрирован)
@@ -49,7 +54,7 @@ class MessageHandler:
         logger.info(f"[MessageHandler] Найден триггер упоминания в чате {chat_id}, обрабатываем...")
         
         # Проверяем, что это группа или супергруппа
-        if chat.type not in ["group", "supergroup"]:
+        if chat.type not in GROUP_CHAT_TYPES:
             await context.bot.send_message(
                 chat_id=chat_id,
                 text="Эта команда работает только в группах."
@@ -84,15 +89,18 @@ class MessageHandler:
                 mention_service
             )
         except TelegramError as e:
-            logger.error(f"Ошибка Telegram API: {e}")
+            # Обрабатываем ошибки Telegram API с помощью нового модуля
+            handled_error = handle_telegram_error(e, f"chat_id={chat_id}, message_id={mention_message.message_id}")
+            error_msg = get_user_friendly_message(handled_error)
+            logger.error(f"Ошибка Telegram API при обработке упоминания: {error_msg}")
             await self._send_error_message(
                 context, 
                 chat_id, 
                 mention_message, 
-                f"Произошла ошибка: {e.message}. Убедитесь, что у меня есть права администратора."
+                error_msg
             )
         except Exception as e:
-            logger.error(f"Неизвестная ошибка: {e}", exc_info=True)
+            logger.error(f"Неизвестная ошибка при обработке упоминания: {e}", exc_info=True)
             await self._send_error_message(
                 context, 
                 chat_id, 

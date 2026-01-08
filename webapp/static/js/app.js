@@ -40,11 +40,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     await loadChats();
     
-    // Обработчик кнопки обновления
-    const refreshBtn = document.querySelector('.refresh-btn');
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', async () => {
+    // Обработчик кнопки обновления в шапке
+    const refreshBtnHeader = document.querySelector('.refresh-btn-header');
+    if (refreshBtnHeader) {
+        refreshBtnHeader.addEventListener('click', async () => {
+            const icon = refreshBtnHeader.querySelector('i');
+            if (icon) {
+                icon.style.animation = 'spin 1s linear infinite';
+            }
             await loadChats();
+            if (icon) {
+                icon.style.animation = '';
+            }
         });
     }
     
@@ -86,13 +93,22 @@ async function loadChats() {
         
         const data = await response.json();
         
-        if (data.error) {
-            showError(data.error);
+        if (!data.success) {
+            showError(data.error || 'Не удалось загрузить список чатов');
             return;
         }
         
-        renderStats(data.stats);
-        renderChats(data.chats, data.info);
+        // Показываем предупреждение, если данные из кэша
+        if (data.cached && data.warning) {
+            showToast(data.warning, 'warning');
+        }
+        
+        // Сохраняем данные для фильтрации
+        currentChats = data.chats || [];
+        currentStats = data.stats;
+        
+        renderStats(currentStats);
+        applyFilters(); // Применяем фильтры и сортировку
         
     } catch (error) {
         console.error('Error loading chats:', error);
@@ -135,19 +151,30 @@ function renderChats(chats, infoMessage) {
     if (!chats || chats.length === 0) {
         let emptyContent = `
             <div class="empty-state">
-                <i data-lucide="message-square" style="width: 48px; height: 48px; opacity: 0.3; margin-bottom: 16px;"></i>
-                <p>Бот еще не добавлен ни в один чат</p>
+                <i data-lucide="message-square" style="width: 64px; height: 64px; opacity: 0.3; margin-bottom: 20px;"></i>
+                <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #1a1a1a;">Чаты не найдены</h3>
+                <p style="color: #666; margin-bottom: 20px; line-height: 1.6;">
+                    Бот еще не добавлен ни в один чат или у вас нет доступа к чатам.
+                </p>
         `;
         
         if (infoMessage) {
             emptyContent += `
-                <div style="margin-top: 20px; padding: 16px; background: #fafafa; border: 1px solid #e0e0e0; text-align: left; font-size: 13px; line-height: 1.6;">
+                <div class="info-box" style="margin-top: 20px; padding: 20px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; text-align: left; font-size: 14px; line-height: 1.7; color: #555;">
+                    <strong style="display: block; margin-bottom: 12px; color: #1a1a1a;">ℹ️ Информация:</strong>
                     ${escapeHtml(infoMessage).replace(/\n/g, '<br>')}
                 </div>
             `;
         }
         
-        emptyContent += `</div>`;
+        emptyContent += `
+            <div style="margin-top: 24px;">
+                <button class="refresh-btn" onclick="loadChats()" style="margin: 0 auto;">
+                    <i data-lucide="refresh-cw" style="width: 16px; height: 16px; margin-right: 8px;"></i>
+                    Обновить список
+                </button>
+            </div>
+        </div>`;
         chatsContainer.innerHTML = emptyContent;
         lucide.createIcons();
         return;
@@ -156,6 +183,7 @@ function renderChats(chats, infoMessage) {
     chatsContainer.innerHTML = chats.map(chat => {
         const chatTitle = escapeHtml(chat.title || 'Без названия');
         const chatInitials = chatTitle.substring(0, 2).toUpperCase();
+        const chatId = chat.id;
         
         console.log(`[Frontend] Обработка чата ${chat.id} (${chatTitle}): photo_url = ${chat.photo_url || 'отсутствует'}`);
         
@@ -184,7 +212,7 @@ function renderChats(chats, infoMessage) {
         }
         
         return `
-        <div class="chat-item" onclick="openChat(${chat.id}, '${chatTitle}')">
+        <div class="chat-item" onclick="openChat(${chat.id}, '${escapeHtml(chatTitle)}')">
             <div class="chat-avatar">
                 ${avatarHtml}
             </div>
@@ -195,8 +223,11 @@ function renderChats(chats, infoMessage) {
                     ${chat.members_count ? `<span><i data-lucide="user" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle;"></i> ${chat.members_count}</span>` : ''}
                 </div>
             </div>
-            <div class="chat-arrow">
-                <i data-lucide="chevron-right"></i>
+            <div class="chat-actions">
+                <button class="chat-delete-btn" onclick="event.stopPropagation(); deleteChat(${chat.id}, '${escapeHtml(chatTitle)}')" title="Удалить чат из списка">
+                    <i data-lucide="trash-2"></i>
+                </button>
+                <i data-lucide="chevron-right" class="chat-arrow"></i>
             </div>
         </div>
     `;
@@ -237,26 +268,72 @@ function openChat(chatId, chatTitle) {
     window.location.href = `/members?chat_id=${chatId}&title=${encodedTitle}`;
 }
 
-// Поиск чатов
-function performSearch() {
-    const searchInput = document.getElementById('searchInput');
-    const searchTerm = searchInput?.value.toLowerCase().trim();
-    
-    if (!searchTerm) {
-        loadChats();
+// Применение фильтров и сортировки
+function applyFilters() {
+    if (!currentChats || currentChats.length === 0) {
+        renderChats([], null);
         return;
     }
     
-    // Фильтруем уже загруженные чаты
-    const chatItems = document.querySelectorAll('.chat-item');
-    chatItems.forEach(item => {
-        const chatName = item.querySelector('.chat-name')?.textContent.toLowerCase() || '';
-        if (chatName.includes(searchTerm)) {
-            item.style.display = 'flex';
-        } else {
-            item.style.display = 'none';
-        }
-    });
+    let filtered = [...currentChats];
+    
+    // Фильтр по типу
+    const filterType = document.getElementById('filterType')?.value || 'all';
+    if (filterType !== 'all') {
+        filtered = filtered.filter(chat => chat.type === filterType);
+    }
+    
+    // Поиск по названию
+    const searchInput = document.getElementById('searchInput');
+    const searchTerm = searchInput?.value.toLowerCase().trim();
+    if (searchTerm) {
+        filtered = filtered.filter(chat => 
+            (chat.title || '').toLowerCase().includes(searchTerm)
+        );
+    }
+    
+    // Сортировка
+    const sortBy = document.getElementById('sortBy')?.value || 'title';
+    const sortOrder = document.getElementById('sortOrder')?.value || 'asc';
+    
+    if (sortBy === 'title') {
+        filtered.sort((a, b) => {
+            const cmp = (a.title || '').toLowerCase().localeCompare((b.title || '').toLowerCase());
+            return sortOrder === 'asc' ? cmp : -cmp;
+        });
+    } else if (sortBy === 'members_count') {
+        filtered.sort((a, b) => {
+            const aCount = a.members_count || 0;
+            const bCount = b.members_count || 0;
+            const cmp = aCount - bCount;
+            return sortOrder === 'asc' ? cmp : -cmp;
+        });
+    } else if (sortBy === 'type') {
+        filtered.sort((a, b) => {
+            const cmp = a.type.localeCompare(b.type);
+            return sortOrder === 'asc' ? cmp : -cmp;
+        });
+    }
+    
+    // Отображаем отфильтрованные чаты
+    renderChats(filtered, null);
+    
+    // Обновляем статистику для отфильтрованных чатов
+    if (currentStats) {
+        const filteredStats = {
+            total: filtered.length,
+            groups: filtered.filter(c => c.type === 'group').length,
+            supergroups: filtered.filter(c => c.type === 'supergroup').length,
+            private: 0,
+            channels: 0
+        };
+        renderStats(filteredStats);
+    }
+}
+
+// Поиск чатов
+function performSearch() {
+    applyFilters();
 }
 
 // Показать ошибку
@@ -271,13 +348,32 @@ function showError(message) {
     }
 }
 
+// Генерация skeleton screens для чатов
+function generateSkeletonChats() {
+    const skeletonCount = 5;
+    let html = '';
+    for (let i = 0; i < skeletonCount; i++) {
+        html += `
+            <div class="skeleton-chat-item">
+                <div class="skeleton skeleton-avatar"></div>
+                <div style="flex: 1;">
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton skeleton-text skeleton-text-short"></div>
+                </div>
+            </div>
+        `;
+    }
+    return html;
+}
+
 // Показать загрузку
 function showLoading() {
     if (loadingElement) {
-        loadingElement.style.display = 'block';
+        loadingElement.style.display = 'flex';
     }
     if (chatsContainer) {
-        chatsContainer.innerHTML = '';
+        // Показываем skeleton screens вместо пустого контейнера
+        chatsContainer.innerHTML = generateSkeletonChats();
     }
 }
 
@@ -285,6 +381,61 @@ function showLoading() {
 function hideLoading() {
     if (loadingElement) {
         loadingElement.style.display = 'none';
+    }
+}
+
+// Показать toast уведомление
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    
+    document.body.appendChild(toast);
+    
+    // Анимация появления
+    setTimeout(() => toast.classList.add('show'), 10);
+    
+    // Автоматическое скрытие через 5 секунд
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 5000);
+}
+
+// Удаление чата из списка
+async function deleteChat(chatId, chatTitle) {
+    if (!confirm(`Вы уверены, что хотите удалить чат "${chatTitle}" из списка?`)) {
+        return;
+    }
+    
+    try {
+        // Отправляем запрос на удаление
+        const response = await fetch(`/api/chats/${chatId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                user_id: tg.initDataUnsafe?.user?.id
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Ошибка при удалении чата');
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast('Чат успешно удален из списка', 'success');
+            // Обновляем список чатов
+            await loadChats();
+        } else {
+            showToast(data.error || 'Не удалось удалить чат', 'error');
+        }
+    } catch (error) {
+        console.error('Error deleting chat:', error);
+        showToast('Ошибка при удалении чата', 'error');
     }
 }
 

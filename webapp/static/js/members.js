@@ -9,6 +9,13 @@ tg.expand();
 const membersList = document.getElementById('membersList');
 const loadingElement = document.getElementById('loading');
 const chatTitleElement = document.getElementById('chatTitle');
+const paginationContainer = document.createElement('div');
+paginationContainer.className = 'pagination';
+
+// Состояние пагинации
+let currentMembers = [];
+let currentPage = 1;
+const MEMBERS_PER_PAGE = 25;
 
 // Получаем chat_id из URL параметров
 const urlParams = new URLSearchParams(window.location.search);
@@ -36,6 +43,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
     
+    // Вставляем контейнер пагинации после списка участников
+    if (membersList && membersList.parentElement) {
+        membersList.parentElement.appendChild(paginationContainer);
+    }
+
     if (chatId) {
         await loadMembers(parseInt(chatId));
     } else {
@@ -89,8 +101,11 @@ async function loadMembers(chatId) {
             throw new Error(data.error || 'Не удалось загрузить участников');
         }
         
-        // Отображаем участников
-        renderMembers(data.members);
+        // Сохраняем всех участников для пагинации
+        currentMembers = data.members || [];
+        currentPage = 1;
+
+        renderMembersPaginated();
         
     } catch (error) {
         console.error('[Members] Error loading members:', error);
@@ -100,15 +115,18 @@ async function loadMembers(chatId) {
     }
 }
 
-// Отображение списка участников
+// Отображение списка участников (одной страницы)
 function renderMembers(members) {
     if (!membersList) return;
     
     if (!members || members.length === 0) {
         membersList.innerHTML = `
             <div class="empty-state">
-                <i data-lucide="users" style="width: 48px; height: 48px; opacity: 0.3; margin-bottom: 16px;"></i>
-                <p>Участники не найдены</p>
+                <i data-lucide="users" style="width: 64px; height: 64px; opacity: 0.3; margin-bottom: 20px;"></i>
+                <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #1a1a1a;">Участники не найдены</h3>
+                <p style="color: #666; line-height: 1.6;">
+                    Не удалось загрузить список участников. Возможно, у вас нет прав для просмотра участников этой группы.
+                </p>
             </div>
         `;
         lucide.createIcons();
@@ -131,7 +149,7 @@ function renderMembers(members) {
         
         console.log(`[Frontend] Обработка участника ${member.id} (${displayName}): profile_photo_url = ${member.profile_photo_url || 'отсутствует'}`);
         
-        // Формируем аватарку
+        // Ленивая загрузка фото профиля - загружаем только при необходимости
         let avatarHtml = '';
         if (member.profile_photo_url) {
             // Проверяем тип файла по расширению
@@ -149,7 +167,8 @@ function renderMembers(members) {
             } else {
                 // Обычное фото или GIF (оба отображаются через img, GIF будет автопроигрываться)
                 console.log(`[Frontend] Участник ${member.id}: определяем как фото/GIF`);
-                avatarHtml = `<img class="member-avatar-img" src="${escapeHtml(photoUrl)}" alt="${escapeHtml(displayName)}" onerror="console.error('[Frontend] Ошибка загрузки фото участника ${member.id}'); this.parentElement.innerHTML='<div class=\\'member-avatar-text\\'>${initials}</div>'" />`;
+                // Используем loading="lazy" для ленивой загрузки
+                avatarHtml = `<img class="member-avatar-img" src="${escapeHtml(photoUrl)}" alt="${escapeHtml(displayName)}" loading="lazy" onerror="console.error('[Frontend] Ошибка загрузки фото участника ${member.id}'); this.parentElement.innerHTML='<div class=\\'member-avatar-text\\'>${initials}</div>'" />`;
             }
         } else {
             // Если нет фото, показываем инициалы
@@ -199,6 +218,80 @@ function renderMembers(members) {
     lucide.createIcons();
 }
 
+// Отрисовка текущей страницы участников
+function renderMembersPaginated() {
+    if (!currentMembers || currentMembers.length === 0) {
+        renderMembers([]);
+        updatePaginationControls();
+        return;
+    }
+
+    const totalPages = Math.max(1, Math.ceil(currentMembers.length / MEMBERS_PER_PAGE));
+    if (currentPage > totalPages) {
+        currentPage = totalPages;
+    }
+
+    const startIndex = (currentPage - 1) * MEMBERS_PER_PAGE;
+    const endIndex = startIndex + MEMBERS_PER_PAGE;
+    const pageMembers = currentMembers.slice(startIndex, endIndex);
+
+    renderMembers(pageMembers);
+    updatePaginationControls(totalPages);
+}
+
+// Обновление UI пагинации
+function updatePaginationControls(totalPages = 1) {
+    if (!paginationContainer) return;
+
+    if (!currentMembers || currentMembers.length === 0) {
+        paginationContainer.style.display = 'none';
+        paginationContainer.innerHTML = '';
+        return;
+    }
+
+    paginationContainer.style.display = 'flex';
+    paginationContainer.innerHTML = `
+        <button
+            class="pagination-btn"
+            onclick="changeMembersPage('prev')"
+            ${currentPage <= 1 ? 'disabled' : ''}
+        >
+            <i data-lucide="chevron-left"></i>
+            Предыдущая
+        </button>
+        <span class="pagination-info">
+            Страница ${currentPage} из ${totalPages}
+        </span>
+        <button
+            class="pagination-btn"
+            onclick="changeMembersPage('next')"
+            ${currentPage >= totalPages ? 'disabled' : ''}
+        >
+            Следующая
+            <i data-lucide="chevron-right"></i>
+        </button>
+    `;
+
+    lucide.createIcons();
+}
+
+// Смена страницы
+function changeMembersPage(direction) {
+    if (!currentMembers || currentMembers.length === 0) return;
+
+    const totalPages = Math.max(1, Math.ceil(currentMembers.length / MEMBERS_PER_PAGE));
+
+    if (direction === 'prev' && currentPage > 1) {
+        currentPage -= 1;
+    } else if (direction === 'next' && currentPage < totalPages) {
+        currentPage += 1;
+    } else {
+        return;
+    }
+
+    renderMembersPaginated();
+}
+
 // Показать ошибку
 function showError(message) {
     if (membersList) {
@@ -216,8 +309,27 @@ function showLoading() {
         loadingElement.style.display = 'block';
     }
     if (membersList) {
-        membersList.innerHTML = '';
+        // Показываем skeleton screens вместо пустого контейнера
+        membersList.innerHTML = generateSkeletonMembers();
     }
+}
+
+// Генерация skeleton screens для участников
+function generateSkeletonMembers() {
+    const skeletonCount = 8;
+    let html = '';
+    for (let i = 0; i < skeletonCount; i++) {
+        html += `
+            <div class="skeleton-member-item">
+                <div class="skeleton skeleton-member-avatar"></div>
+                <div style="flex: 1;">
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton skeleton-text skeleton-text-short"></div>
+                </div>
+            </div>
+        `;
+    }
+    return html;
 }
 
 // Скрыть загрузку
