@@ -36,6 +36,19 @@ def main() -> None:
         logger.error(e)
         return
     
+    # Компилируем SCSS перед запуском
+    try:
+        from webapp.utils.scss_compiler import compile_scss
+        logger.info("Компиляция SCSS...")
+        if compile_scss(output_style='expanded'):
+            logger.info("SCSS успешно скомпилирован")
+        else:
+            logger.warning("SCSS не был скомпилирован (возможно, файлы не найдены)")
+    except ImportError as e:
+        logger.warning(f"libsass не установлен, пропускаем компиляцию SCSS: {e}")
+    except Exception as e:
+        logger.warning(f"Ошибка при компиляции SCSS: {e}")
+    
     # Запускаем веб-сервер в отдельном потоке
     webapp_thread = threading.Thread(target=run_webapp, daemon=True)
     webapp_thread.start()

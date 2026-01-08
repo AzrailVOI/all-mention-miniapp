@@ -42,6 +42,53 @@ body {
     font-weight: 400;
 }
 
+.toggle-all-btn {
+    background: #1a1a1a;
+    color: white;
+    border: 1px solid #1a1a1a;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.toggle-all-btn:hover {
+    background: white;
+    color: #1a1a1a;
+}
+
+.toggle-all-btn:active {
+    background: #f5f5f5;
+}
+
+.toggle-all-btn i {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.3s ease;
+}
+
+.toggle-all-text {
+    font-size: 12px;
+}
+
+@media (max-width: 600px) {
+    .toggle-all-text {
+        display: none;
+    }
+    
+    .toggle-all-btn {
+        padding: 10px;
+        min-width: 40px;
+    }
+}
+
 .back-btn {
     background: none;
     border: 1px solid #1a1a1a;
@@ -75,6 +122,21 @@ body {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 15px;
     margin-bottom: 30px;
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.3s ease, margin-bottom 0.3s ease;
+}
+
+.stats.collapsed {
+    max-height: 0 !important;
+    opacity: 0;
+    margin-bottom: 0 !important;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.stats.expanded {
+    max-height: 1000px;
+    opacity: 1;
 }
 
 .stat-card {
@@ -123,6 +185,31 @@ body {
     background: white;
     border: 1px solid #e0e0e0;
     padding: 24px;
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease;
+}
+
+.chats-section.collapsed {
+    max-height: 50px !important;
+    opacity: 0.3;
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+.chats-section.collapsed .section-title {
+    margin-bottom: 0;
+    cursor: pointer;
+}
+
+.chats-section.collapsed .search-container,
+.chats-section.collapsed .chat-list,
+.chats-section.collapsed .loading {
+    display: none !important;
+}
+
+.chats-section.expanded {
+    max-height: 10000px;
+    opacity: 1;
 }
 
 .section-title {

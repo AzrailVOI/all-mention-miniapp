@@ -1,0 +1,48 @@
+// Переменные цветов
+$color-primary: #1a1a1a;
+$color-background: #f5f5f5;
+$color-white: #ffffff;
+$color-gray-light: #fafafa;
+$color-gray-medium: #e0e0e0;
+$color-gray-dark: #666666;
+$color-gray-placeholder: #999999;
+
+// Переменные шрифтов
+$font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+$font-size-base: 14px;
+$font-size-small: 12px;
+$font-size-large: 16px;
+$font-size-xl: 18px;
+$font-size-xxl: 24px;
+$font-size-xxxl: 32px;
+$font-size-huge: 36px;
+
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// Переменные размеров
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 12px;
+$spacing-lg: 16px;
+$spacing-xl: 20px;
+$spacing-xxl: 24px;
+$spacing-xxxl: 30px;
+$spacing-huge: 40px;
+$spacing-giant: 60px;
+
+$border-radius-sm: 4px;
+$border-radius-md: 8px;
+$border-radius-full: 50%;
+
+$container-max-width: 800px;
+
+// Переменные переходов
+$transition-fast: 0.2s;
+$transition-normal: 0.3s;
+$transition-slow: 0.4s;
+
+// Переменные breakpoints
+$breakpoint-mobile: 600px;

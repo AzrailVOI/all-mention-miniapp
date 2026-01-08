@@ -3,6 +3,7 @@ import logging
 import hmac
 import hashlib
 import json
+import os
 from flask import Flask, render_template, request, jsonify
 from telegram import Bot
 from telegram.error import TelegramError
@@ -18,6 +19,20 @@ app.config['SECRET_KEY'] = Config.TOKEN  # Используем токен бо�
 # Версия для cache busting
 import time
 APP_VERSION = str(int(time.time()))  # Используем timestamp как версию
+
+# Компилируем SCSS при запуске (если в режиме разработки)
+# В продакшене можно отключить через переменную окружения COMPILE_SCSS=false
+if os.getenv('FLASK_ENV') == 'development' or os.getenv('COMPILE_SCSS', 'true').lower() == 'true':
+    try:
+        from webapp.utils.scss_compiler import compile_scss
+        if compile_scss(output_style='expanded'):
+            logger.info("SCSS скомпилирован при запуске приложения")
+        else:
+            logger.warning("SCSS не был скомпилирован (возможно, файлы не найдены или libsass не установлен)")
+    except ImportError as e:
+        logger.warning(f"libsass не установлен, пропускаем компиляцию SCSS: {e}")
+    except Exception as e:
+        logger.warning(f"Не удалось скомпилировать SCSS при запуске: {e}")
 
 
 def validate_telegram_webapp_data(init_data: str) -> bool:

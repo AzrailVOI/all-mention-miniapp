@@ -1,0 +1,9 @@
+// Главный файл SCSS
+// Импортирует все модули в правильном порядке
+
+@import 'variables';
+@import 'mixins';
+@import 'base';
+@import 'layout';
+@import 'components';
+@import 'responsive';

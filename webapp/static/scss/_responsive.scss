@@ -1,0 +1,42 @@
+// Адаптивные стили
+
+@include mobile {
+    .header h1 {
+        font-size: $font-size-xxl;
+    }
+    
+    .toggle-all-text {
+        display: none;
+    }
+    
+    .toggle-all-btn {
+        padding: 10px;
+        min-width: 40px;
+    }
+    
+    .stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .chat-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .chat-icon {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+    
+    .chat-arrow {
+        display: none;
+    }
+    
+    .search-container {
+        flex-direction: column;
+    }
+    
+    .modal-content {
+        max-height: 90vh;
+    }
+}

@@ -1,3 +1,8 @@
+/**
+ * Главный файл приложения для страницы списка чатов
+ * Использует модульную архитектуру
+ */
+
 // Telegram WebApp API
 const tg = window.Telegram.WebApp;
 
@@ -5,24 +10,22 @@ const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
 
-// На главной странице скрываем кнопку закрыть (она не нужна)
-if (tg.close) {
-    // На главной странице можно закрыть миниапп
-    // Но кнопка закрыть управляется автоматически Telegram
-}
-
 // Элементы DOM
 const statsContainer = document.querySelector('.stats');
 const chatsContainer = document.querySelector('.chat-list');
 const loadingElement = document.querySelector('.loading');
 
-// API endpoint
-const API_URL = '/api/chats';
-
 // Инициализация
 document.addEventListener('DOMContentLoaded', async () => {
     // Инициализируем иконки Lucide
-    lucide.createIcons();
+    if (window.lucide) {
+        window.lucide.createIcons();
+    }
+    
+    // Инициализируем сворачивание блоков (по умолчанию все свернуты)
+    if (window.Collapse) {
+        window.Collapse.init();
+    }
     
     // На главной странице скрываем кнопку назад (если она есть)
     if (tg.BackButton) {
@@ -38,13 +41,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
     
-    await loadChats();
+    await loadChatsData();
     
     // Обработчик кнопки обновления
     const refreshBtn = document.querySelector('.refresh-btn');
     if (refreshBtn) {
         refreshBtn.addEventListener('click', async () => {
-            await loadChats();
+            await loadChatsData();
         });
     }
     
@@ -53,245 +56,91 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (searchInput) {
         searchInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
-                performSearch();
+                performSearchHandler();
             }
         });
     }
 });
 
-// Загрузка списка чатов
-async function loadChats() {
+/**
+ * Загружает и отображает список чатов
+ */
+async function loadChatsData() {
     try {
-        showLoading();
-        
-        // Получаем данные пользователя из Telegram WebApp
-        const initData = tg.initData;
-        const user = tg.initDataUnsafe?.user;
-        
-        // Отправляем запрос на сервер
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                init_data: initData,
-                user_id: user?.id
-            })
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        // Показываем загрузку
+        if (window.Loading) {
+            window.Loading.show(loadingElement, chatsContainer);
+        } else {
+            if (loadingElement) loadingElement.style.display = 'block';
+            if (chatsContainer) chatsContainer.innerHTML = '';
         }
         
-        const data = await response.json();
+        // Загружаем данные через API
+        const data = await window.ChatsAPI.loadChats();
         
-        if (data.error) {
-            showError(data.error);
-            return;
+        // Отображаем статистику
+        if (window.StatsRender && statsContainer) {
+            window.StatsRender.renderStats(data.stats, statsContainer);
         }
         
-        renderStats(data.stats);
-        renderChats(data.chats, data.info);
+        // Отображаем список чатов
+        if (window.ChatsRender && chatsContainer) {
+            window.ChatsRender.renderChats(data.chats, data.info, chatsContainer);
+        }
         
     } catch (error) {
         console.error('Error loading chats:', error);
-        showError('Не удалось загрузить список чатов. Попробуйте обновить страницу.');
-    } finally {
-        hideLoading();
-    }
-}
-
-// Отображение статистики
-function renderStats(stats) {
-    if (!statsContainer) return;
-    
-    statsContainer.innerHTML = `
-        <div class="stat-card">
-            <div class="stat-icon"><i data-lucide="message-square"></i></div>
-            <div class="stat-value">${stats.total || 0}</div>
-            <div class="stat-label">Всего чатов</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon"><i data-lucide="users"></i></div>
-            <div class="stat-value">${stats.groups || 0}</div>
-            <div class="stat-label">Группы</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon"><i data-lucide="users-round"></i></div>
-            <div class="stat-value">${stats.supergroups || 0}</div>
-            <div class="stat-label">Супергруппы</div>
-        </div>
-    `;
-    
-    // Инициализируем иконки
-    lucide.createIcons();
-}
-
-// Отображение списка чатов
-function renderChats(chats, infoMessage) {
-    if (!chatsContainer) return;
-    
-    if (!chats || chats.length === 0) {
-        let emptyContent = `
-            <div class="empty-state">
-                <i data-lucide="message-square" style="width: 48px; height: 48px; opacity: 0.3; margin-bottom: 16px;"></i>
-                <p>Бот еще не добавлен ни в один чат</p>
-        `;
         
-        if (infoMessage) {
-            emptyContent += `
-                <div style="margin-top: 20px; padding: 16px; background: #fafafa; border: 1px solid #e0e0e0; text-align: left; font-size: 13px; line-height: 1.6;">
-                    ${escapeHtml(infoMessage).replace(/\n/g, '<br>')}
+        // Показываем ошибку
+        const errorMessage = error.message || 'Не удалось загрузить список чатов. Попробуйте обновить страницу.';
+        if (window.Errors && chatsContainer) {
+            window.Errors.show(errorMessage, chatsContainer);
+        } else if (chatsContainer) {
+            chatsContainer.innerHTML = `
+                <div class="error">
+                    <strong>Ошибка:</strong> ${window.escapeHtml ? window.escapeHtml(errorMessage) : errorMessage}
                 </div>
+                <button class="refresh-btn" onclick="location.reload()">Обновить</button>
             `;
         }
-        
-        emptyContent += `</div>`;
-        chatsContainer.innerHTML = emptyContent;
-        lucide.createIcons();
-        return;
-    }
-    
-    chatsContainer.innerHTML = chats.map(chat => {
-        const chatTitle = escapeHtml(chat.title || 'Без названия');
-        const chatInitials = chatTitle.substring(0, 2).toUpperCase();
-        
-        console.log(`[Frontend] Обработка чата ${chat.id} (${chatTitle}): photo_url = ${chat.photo_url || 'отсутствует'}`);
-        
-        // Формируем аватарку чата
-        let avatarHtml = '';
-        if (chat.photo_url) {
-            const photoUrl = chat.photo_url;
-            console.log(`[Frontend] Чат ${chat.id}: есть photo_url = ${photoUrl}`);
-            
-            const urlLower = photoUrl.toLowerCase();
-            const isVideo = urlLower.includes('.mp4') || urlLower.includes('.mov') || urlLower.includes('video');
-            
-            if (isVideo) {
-                // Видео аватарка
-                console.log(`[Frontend] Чат ${chat.id}: определяем как видео`);
-                avatarHtml = `<video class="chat-avatar-img" autoplay loop muted playsinline><source src="${escapeHtml(photoUrl)}" type="video/mp4"></video>`;
-            } else {
-                // Обычное фото или GIF
-                console.log(`[Frontend] Чат ${chat.id}: определяем как фото/GIF`);
-                avatarHtml = `<img class="chat-avatar-img" src="${escapeHtml(photoUrl)}" alt="${chatTitle}" onerror="console.error('[Frontend] Ошибка загрузки фото чата ${chat.id}'); this.parentElement.innerHTML='<div class=\\'chat-avatar-text\\'>${chatInitials}</div>'" />`;
-            }
+    } finally {
+        // Скрываем загрузку
+        if (window.Loading) {
+            window.Loading.hide(loadingElement);
         } else {
-            // Если нет фото, показываем иконку
-            console.log(`[Frontend] Чат ${chat.id}: нет photo_url, показываем иконку`);
-            avatarHtml = `<div class="chat-avatar-icon">${getChatIcon(chat.type)}</div>`;
+            if (loadingElement) loadingElement.style.display = 'none';
         }
-        
-        return `
-        <div class="chat-item" onclick="openChat(${chat.id}, '${chatTitle}')">
-            <div class="chat-avatar">
-                ${avatarHtml}
-            </div>
-            <div class="chat-info">
-                <div class="chat-name">${escapeHtml(chat.title || 'Без названия')}</div>
-                <div class="chat-details">
-                    <span class="chat-type ${chat.type}">${getChatTypeLabel(chat.type)}</span>
-                    ${chat.members_count ? `<span><i data-lucide="user" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle;"></i> ${chat.members_count}</span>` : ''}
-                </div>
-            </div>
-            <div class="chat-arrow">
-                <i data-lucide="chevron-right"></i>
-            </div>
-        </div>
-    `;
-    }).join('');
-    
-    // Инициализируем иконки
-    lucide.createIcons();
+    }
 }
 
-// Получить иконку для типа чата
-function getChatIcon(type) {
-    const icons = {
-        'group': '<i data-lucide="users"></i>',
-        'supergroup': '<i data-lucide="users-round"></i>',
-        'private': '<i data-lucide="user"></i>',
-        'channel': '<i data-lucide="megaphone"></i>'
-    };
-    return icons[type] || '<i data-lucide="message-square"></i>';
-}
-
-// Получить метку для типа чата
-function getChatTypeLabel(type) {
-    const labels = {
-        'group': 'Группа',
-        'supergroup': 'Супергруппа',
-        'private': 'Приватный',
-        'channel': 'Канал'
-    };
-    return labels[type] || type;
-}
-
-// Открыть страницу участников чата
-function openChat(chatId, chatTitle) {
-    // Переходим на отдельную страницу участников
-    const encodedTitle = encodeURIComponent(chatTitle || 'Участники чата');
-    // Используем pushState для правильной работы кнопки назад
-    window.history.pushState({ page: 'members', chatId, chatTitle }, '', `/members?chat_id=${chatId}&title=${encodedTitle}`);
-    window.location.href = `/members?chat_id=${chatId}&title=${encodedTitle}`;
-}
-
-// Поиск чатов
-function performSearch() {
+/**
+ * Обработчик поиска чатов
+ */
+function performSearchHandler() {
     const searchInput = document.getElementById('searchInput');
-    const searchTerm = searchInput?.value.toLowerCase().trim();
+    const searchTerm = searchInput?.value;
     
-    if (!searchTerm) {
-        loadChats();
-        return;
-    }
-    
-    // Фильтруем уже загруженные чаты
-    const chatItems = document.querySelectorAll('.chat-item');
-    chatItems.forEach(item => {
-        const chatName = item.querySelector('.chat-name')?.textContent.toLowerCase() || '';
-        if (chatName.includes(searchTerm)) {
-            item.style.display = 'flex';
-        } else {
-            item.style.display = 'none';
+    if (window.Search) {
+        window.Search.performSearch(searchTerm, loadChatsData);
+    } else {
+        // Fallback
+        if (!searchTerm || !searchTerm.trim()) {
+            loadChatsData();
+            return;
         }
-    });
-}
-
-// Показать ошибку
-function showError(message) {
-    if (chatsContainer) {
-        chatsContainer.innerHTML = `
-            <div class="error">
-                <strong>Ошибка:</strong> ${escapeHtml(message)}
-            </div>
-            <button class="refresh-btn" onclick="location.reload()">Обновить</button>
-        `;
+        
+        const term = searchTerm.toLowerCase().trim();
+        const chatItems = document.querySelectorAll('.chat-item');
+        chatItems.forEach(item => {
+            const chatName = item.querySelector('.chat-name')?.textContent.toLowerCase() || '';
+            if (chatName.includes(term)) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
     }
 }
 
-// Показать загрузку
-function showLoading() {
-    if (loadingElement) {
-        loadingElement.style.display = 'block';
-    }
-    if (chatsContainer) {
-        chatsContainer.innerHTML = '';
-    }
-}
-
-// Скрыть загрузку
-function hideLoading() {
-    if (loadingElement) {
-        loadingElement.style.display = 'none';
-    }
-}
-
-// Экранирование HTML
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
+// Экспорт для использования в HTML (onclick)
+window.performSearch = performSearchHandler;

@@ -1,0 +1,443 @@
+// Компоненты
+
+// Кнопки
+.toggle-all-btn {
+    @include button-base;
+    padding: 10px $spacing-lg;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    white-space: nowrap;
+    
+    i {
+        width: 18px;
+        height: 18px;
+        @include transition(transform $transition-normal ease);
+    }
+    
+    .toggle-all-text {
+        font-size: $font-size-small;
+    }
+}
+
+.back-btn {
+    @include button-icon(40px);
+}
+
+.refresh-btn {
+    @include button-base;
+    padding: $spacing-md $spacing-xxl;
+    font-size: $font-size-base;
+    margin-top: $spacing-xl;
+}
+
+.search-btn {
+    @include button-base;
+    padding: $spacing-md;
+    @include flex-center;
+    min-width: 48px;
+    
+    i {
+        width: $spacing-xl;
+        height: $spacing-xl;
+    }
+}
+
+// Статистика
+.stat-card {
+    background: $color-white;
+    border: 1px solid $color-gray-medium;
+    padding: $spacing-xl;
+    text-align: center;
+    @include transition(border-color $transition-fast, box-shadow $transition-fast);
+    
+    &:hover {
+        border-color: $color-primary;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+}
+
+.stat-icon {
+    margin-bottom: $spacing-md;
+    @include flex-center;
+    
+    i {
+        width: $spacing-xxl;
+        height: $spacing-xxl;
+        color: $color-primary;
+    }
+}
+
+.stat-value {
+    font-size: $font-size-huge;
+    font-weight: $font-weight-bold;
+    color: $color-primary;
+    margin-bottom: $spacing-sm;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: $font-size-small;
+    color: $color-gray-dark;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: $font-weight-medium;
+}
+
+// Чаты
+.chat-list {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+}
+
+.chat-item {
+    display: flex;
+    align-items: center;
+    padding: $spacing-lg;
+    background: $color-gray-light;
+    border: 1px solid $color-gray-medium;
+    @include transition-all($transition-fast);
+    cursor: pointer;
+    
+    &:hover {
+        background: $color-background;
+        border-color: $color-primary;
+    }
+}
+
+.chat-icon,
+.chat-avatar {
+    @include avatar(48px);
+    color: $color-primary;
+    margin-right: $spacing-lg;
+}
+
+.chat-icon i {
+    width: $spacing-xxl;
+    height: $spacing-xxl;
+}
+
+.chat-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.chat-avatar video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.chat-avatar-icon {
+    width: 100%;
+    height: 100%;
+    @include flex-center;
+    
+    i {
+        width: $spacing-xxl;
+        height: $spacing-xxl;
+    }
+}
+
+.chat-avatar-text {
+    width: 100%;
+    height: 100%;
+    @include flex-center;
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-base;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.chat-arrow {
+    margin-left: auto;
+    color: $color-gray-dark;
+    @include flex-center;
+    
+    i {
+        width: $spacing-xl;
+        height: $spacing-xl;
+    }
+}
+
+.chat-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.chat-name {
+    font-size: $font-size-large;
+    font-weight: $font-weight-semibold;
+    color: $color-primary;
+    margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chat-details {
+    font-size: $font-size-small;
+    color: $color-gray-dark;
+    display: flex;
+    gap: $spacing-lg;
+    flex-wrap: wrap;
+    align-items: center;
+    
+    i {
+        width: $font-size-small;
+        height: $font-size-small;
+        display: inline-block;
+        vertical-align: middle;
+    }
+}
+
+.chat-type {
+    display: inline-block;
+    padding: 2px $spacing-sm;
+    border: 1px solid $color-primary;
+    font-size: 10px;
+    font-weight: $font-weight-semibold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: $color-white;
+    color: $color-primary;
+    
+    &.group,
+    &.supergroup,
+    &.private,
+    &.channel {
+        border-color: $color-primary;
+    }
+}
+
+// Поиск
+.search-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: $spacing-xl;
+}
+
+.search-input {
+    flex: 1;
+    padding: $spacing-md $spacing-lg;
+    border: 1px solid $color-primary;
+    background: $color-white;
+    font-size: $font-size-base;
+    @include transition(border-color $transition-fast);
+    color: $color-primary;
+    
+    &:focus {
+        outline: none;
+        border-color: $color-primary;
+    }
+    
+    &::placeholder {
+        color: $color-gray-placeholder;
+    }
+}
+
+// Состояния
+.loading {
+    text-align: center;
+    padding: $spacing-huge;
+    color: $color-gray-dark;
+    font-size: $font-size-base;
+    font-weight: $font-weight-medium;
+    
+    &::after {
+        content: '...';
+        animation: dots 1.5s steps(4, end) infinite;
+    }
+}
+
+@keyframes dots {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60%, 100% { content: '...'; }
+}
+
+.error {
+    background: $color-gray-light;
+    color: $color-primary;
+    padding: $spacing-lg;
+    margin: $spacing-xl 0;
+    border: 1px solid $color-primary;
+    border-left: 4px solid $color-primary;
+}
+
+.empty-state {
+    text-align: center;
+    padding: $spacing-giant $spacing-xl;
+    color: $color-gray-dark;
+}
+
+.empty-state-icon {
+    margin-bottom: $spacing-lg;
+    opacity: 0.3;
+    
+    i {
+        width: 48px;
+        height: 48px;
+    }
+}
+
+// Участники
+.members-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.member-item {
+    display: flex;
+    align-items: center;
+    padding: $spacing-md;
+    background: $color-gray-light;
+    border: 1px solid $color-gray-medium;
+    @include transition(border-color $transition-fast, background $transition-fast);
+    
+    &:hover {
+        background: $color-background;
+        border-color: $color-primary;
+    }
+}
+
+.member-avatar {
+    @include avatar(40px);
+    color: $color-primary;
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-small;
+    margin-right: $spacing-md;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.member-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.member-avatar video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.member-avatar-text {
+    width: 100%;
+    height: 100%;
+    @include flex-center;
+}
+
+.member-profile-btn {
+    @include button-icon(36px);
+    margin-left: auto;
+    
+    i {
+        width: $spacing-lg;
+        height: $spacing-lg;
+    }
+}
+
+.member-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.member-name {
+    font-size: 15px;
+    font-weight: $font-weight-semibold;
+    color: $color-primary;
+    margin-bottom: $spacing-xs;
+}
+
+.member-details {
+    font-size: $font-size-small;
+    color: $color-gray-dark;
+    display: flex;
+    gap: $spacing-lg;
+    flex-wrap: wrap;
+}
+
+.member-badge {
+    display: inline-block;
+    padding: 2px $spacing-sm;
+    border: 1px solid $color-primary;
+    font-size: 10px;
+    font-weight: $font-weight-semibold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: $color-white;
+    color: $color-primary;
+    
+    &.admin,
+    &.creator,
+    &.bot {
+        border-color: $color-primary;
+    }
+}
+
+// Модальные окна
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    @include flex-center;
+    z-index: 1000;
+    padding: $spacing-xl;
+}
+
+.modal-content {
+    background: $color-white;
+    border: 1px solid $color-primary;
+    width: 100%;
+    max-width: 600px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-xl;
+    border-bottom: 1px solid $color-primary;
+    
+    h2 {
+        margin: 0;
+        font-size: $font-size-xl;
+        color: $color-primary;
+        font-weight: $font-weight-semibold;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+}
+
+.modal-close {
+    @include button-icon(32px);
+    line-height: 1;
+    
+    i {
+        width: $spacing-xl;
+        height: $spacing-xl;
+    }
+}
+
+.modal-body {
+    padding: $spacing-xl;
+    overflow-y: auto;
+    flex: 1;
+}

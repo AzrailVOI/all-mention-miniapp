@@ -1,0 +1,84 @@
+// Миксины для переходов
+@mixin transition($properties...) {
+    transition: $properties;
+}
+
+@mixin transition-all($duration: $transition-fast) {
+    transition: all $duration;
+}
+
+// Миксин для кнопок
+@mixin button-base {
+    background: $color-primary;
+    color: $color-white;
+    border: 1px solid $color-primary;
+    cursor: pointer;
+    font-weight: $font-weight-semibold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    @include transition-all($transition-fast);
+    
+    &:hover {
+        background: $color-white;
+        color: $color-primary;
+    }
+    
+    &:active {
+        background: $color-gray-light;
+    }
+}
+
+// Миксин для кнопок-иконок
+@mixin button-icon($size: 40px) {
+    background: none;
+    border: 1px solid $color-primary;
+    width: $size;
+    height: $size;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    @include transition(background $transition-fast, color $transition-fast);
+    padding: 0;
+    
+    i {
+        width: $size * 0.5;
+        height: $size * 0.5;
+        color: $color-primary;
+    }
+    
+    &:hover {
+        background: $color-primary;
+        color: $color-white;
+        
+        i {
+            color: $color-white;
+        }
+    }
+}
+
+// Миксин для flex-центрирования
+@mixin flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+// Миксин для аватаров
+@mixin avatar($size: 48px) {
+    width: $size;
+    height: $size;
+    border: 1px solid $color-primary;
+    border-radius: $border-radius-full;
+    overflow: hidden;
+    background: $color-white;
+    position: relative;
+    flex-shrink: 0;
+}
+
+// Миксин для медиа-запросов
+@mixin mobile {
+    @media (max-width: $breakpoint-mobile) {
+        @content;
+    }
+}

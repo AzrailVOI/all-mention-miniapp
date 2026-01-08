@@ -1,0 +1,88 @@
+// Layout компоненты
+
+.header {
+    text-align: left;
+    color: $color-primary;
+    margin-bottom: $spacing-xxxl;
+    padding-bottom: $spacing-xl;
+    border-bottom: 2px solid $color-primary;
+    display: flex;
+    align-items: center;
+    gap: $spacing-lg;
+    
+    h1 {
+        font-size: $font-size-xxxl;
+        margin: 0;
+        font-weight: $font-weight-bold;
+        letter-spacing: -0.5px;
+        flex: 1;
+    }
+    
+    p {
+        font-size: $font-size-base;
+        color: $color-gray-dark;
+        font-weight: $font-weight-normal;
+    }
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: $spacing-xxxl;
+    overflow: hidden;
+    @include transition(max-height $transition-slow ease, opacity $transition-normal ease, margin-bottom $transition-normal ease);
+    
+    &.collapsed {
+        max-height: 0 !important;
+        opacity: 0;
+        margin-bottom: 0 !important;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+    
+    &.expanded {
+        max-height: 1000px;
+        opacity: 1;
+    }
+}
+
+.chats-section {
+    background: $color-white;
+    border: 1px solid $color-gray-medium;
+    padding: $spacing-xxl;
+    overflow: hidden;
+    @include transition(max-height $transition-slow ease, opacity $transition-normal ease, padding $transition-normal ease);
+    
+    &.collapsed {
+        max-height: 50px !important;
+        opacity: 0.3;
+        padding-top: $spacing-md;
+        padding-bottom: $spacing-md;
+        
+        .section-title {
+            margin-bottom: 0;
+            cursor: pointer;
+        }
+        
+        .search-container,
+        .chat-list,
+        .loading {
+            display: none !important;
+        }
+    }
+    
+    &.expanded {
+        max-height: 10000px;
+        opacity: 1;
+    }
+}
+
+.section-title {
+    font-size: $font-size-small;
+    font-weight: $font-weight-semibold;
+    margin-bottom: $spacing-xl;
+    color: $color-primary;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}

@@ -16,6 +16,10 @@
         <div class="header">
             <h1>Мои чаты</h1>
             <p>Список чатов, где добавлен бот</p>
+            <button id="toggleAllBtn" class="toggle-all-btn" onclick="toggleAllBlocks()" title="Развернуть все блоки">
+                <i data-lucide="chevron-down"></i>
+                <span class="toggle-all-text">Развернуть все</span>
+            </button>
         </div>
         
         <div class="stats"></div>
@@ -38,6 +42,24 @@
         
     </div>
     
+    <!-- Модули: базовые утилиты -->
+    <script src="{{ url_for('static', filename='js/utils.js') }}?v={{ version }}"></script>
+    
+    <!-- Модули: API -->
+    <script src="{{ url_for('static', filename='js/api/chats-api.js') }}?v={{ version }}"></script>
+    
+    <!-- Модули: Render -->
+    <script src="{{ url_for('static', filename='js/render/stats-render.js') }}?v={{ version }}"></script>
+    <script src="{{ url_for('static', filename='js/render/chats-render.js') }}?v={{ version }}"></script>
+    
+    <!-- Модули: UI -->
+    <script src="{{ url_for('static', filename='js/ui/loading.js') }}?v={{ version }}"></script>
+    <script src="{{ url_for('static', filename='js/ui/search.js') }}?v={{ version }}"></script>
+    <script src="{{ url_for('static', filename='js/ui/navigation.js') }}?v={{ version }}"></script>
+    <script src="{{ url_for('static', filename='js/ui/errors.js') }}?v={{ version }}"></script>
+    <script src="{{ url_for('static', filename='js/ui/collapse.js') }}?v={{ version }}"></script>
+    
+    <!-- Основной файл приложения -->
     <script src="{{ url_for('static', filename='js/app.js') }}?v={{ version }}"></script>
 </body>
 </html>
