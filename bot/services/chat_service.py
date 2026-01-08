@@ -17,9 +17,13 @@ class ChatService:
         """Проверяет, является ли бот администратором чата"""
         try:
             bot_member = await self.bot.get_chat_member(chat_id, self.bot.id)
-            return bot_member.status in ["administrator", "creator"]
+            is_admin = bot_member.status in ["administrator", "creator"]
+            logger.info(f"[ChatService] Бот {self.bot.id} в чате {chat_id}: статус = {bot_member.status}, является админом = {is_admin}")
+            print(f"[ChatService] Бот {self.bot.id} в чате {chat_id}: статус = {bot_member.status}, является админом = {is_admin}")
+            return is_admin
         except TelegramError as e:
-            logger.error(f"Ошибка при проверке прав администратора: {e}")
+            logger.error(f"[ChatService] Ошибка при проверке прав администратора для чата {chat_id}: {e}")
+            print(f"[ChatService] Ошибка при проверке прав администратора для чата {chat_id}: {e}")
             return False
     
     async def get_all_members(self, chat_id: int) -> List[User]:
@@ -74,18 +78,32 @@ class ChatService:
     async def is_user_creator(self, chat_id: int, user_id: int) -> bool:
         """Проверяет, является ли пользователь создателем чата"""
         try:
+            logger.info(f"[ChatService] Проверка прав создателя: чат {chat_id}, пользователь {user_id}")
+            print(f"[ChatService] Проверка прав создателя: чат {chat_id}, пользователь {user_id}")
+            
             # Получаем список администраторов
             admins = await self.bot.get_chat_administrators(chat_id)
+            logger.info(f"[ChatService] Получено {len(admins)} администраторов для чата {chat_id}")
+            print(f"[ChatService] Получено {len(admins)} администраторов для чата {chat_id}")
             
             # Ищем пользователя среди администраторов
             for admin in admins:
-                if admin.user.id == user_id:
-                    # Проверяем, является ли он создателем
-                    return admin.status == "creator"
+                admin_user_id = admin.user.id
+                admin_status = admin.status
+                logger.debug(f"[ChatService] Админ: {admin_user_id}, статус: {admin_status}")
+                
+                if admin_user_id == user_id:
+                    is_creator = admin_status == "creator"
+                    logger.info(f"[ChatService] Пользователь {user_id} найден, статус: {admin_status}, является создателем: {is_creator}")
+                    print(f"[ChatService] Пользователь {user_id} найден, статус: {admin_status}, является создателем: {is_creator}")
+                    return is_creator
             
+            logger.warning(f"[ChatService] Пользователь {user_id} не найден среди администраторов чата {chat_id}")
+            print(f"[ChatService] Пользователь {user_id} не найден среди администраторов чата {chat_id}")
             return False
         except TelegramError as e:
-            logger.error(f"Ошибка при проверке прав создателя: {e}")
+            logger.error(f"[ChatService] Ошибка при проверке прав создателя для чата {chat_id}, пользователя {user_id}: {e}")
+            print(f"[ChatService] Ошибка при проверке прав создателя для чата {chat_id}, пользователя {user_id}: {e}")
             return False
     
     async def get_chat_members_list(self, chat_id: int) -> List[dict]:

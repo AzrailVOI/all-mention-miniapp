@@ -66,7 +66,12 @@ def get_chats():
         init_data = data.get('init_data', '')
         user_id = data.get('user_id')
         
+        logger.info(f"[API] GET /api/chats - запрос от пользователя {user_id}")
+        print(f"[API] GET /api/chats - запрос от пользователя {user_id}")
+        
         if not user_id:
+            logger.warning(f"[API] GET /api/chats - User ID не предоставлен")
+            print(f"[API] GET /api/chats - User ID не предоставлен")
             return jsonify({
                 'success': False,
                 'error': 'User ID не предоставлен'
@@ -74,13 +79,22 @@ def get_chats():
         
         # Валидация данных (упрощенная)
         if not validate_telegram_webapp_data(init_data):
-            logger.warning(f"Невалидные данные от пользователя {user_id}")
+            logger.warning(f"[API] Невалидные данные от пользователя {user_id}")
+            print(f"[API] Невалидные данные от пользователя {user_id}")
         
         # Получаем список чатов из хранилища
         all_chats = chat_storage.get_all_chats()
+        logger.info(f"[API] Всего чатов в хранилище: {len(all_chats)}")
+        print(f"[API] Всего чатов в хранилище: {len(all_chats)}")
+        
+        if len(all_chats) > 0:
+            logger.info(f"[API] Типы чатов: {[c['type'] for c in all_chats]}")
+            print(f"[API] Типы чатов: {[c['type'] for c in all_chats]}")
         
         # Фильтруем только группы (group и supergroup)
         groups_only = [chat for chat in all_chats if chat['type'] in ['group', 'supergroup']]
+        logger.info(f"[API] Групп после фильтрации по типу: {len(groups_only)}")
+        print(f"[API] Групп после фильтрации по типу: {len(groups_only)}")
         
         # Обновляем информацию о чатах и проверяем права
         bot = Bot(token=Config.TOKEN)
@@ -88,32 +102,55 @@ def get_chats():
         chat_service = ChatService(bot)
         
         filtered_chats = []
+        skipped_not_admin = 0
+        skipped_not_creator = 0
         
         async def filter_chats():
-            nonlocal filtered_chats
+            nonlocal filtered_chats, skipped_not_admin, skipped_not_creator
             for chat_data in groups_only:
                 try:
                     chat_id = chat_data['id']
+                    chat_title = chat_data.get('title', 'Без названия')
+                    
+                    logger.info(f"[API] Проверка чата {chat_id} ({chat_title})")
+                    print(f"[API] Проверка чата {chat_id} ({chat_title})")
                     
                     # Проверяем, является ли бот администратором
                     is_bot_admin = await chat_service.is_bot_admin(chat_id)
+                    logger.info(f"[API] Чат {chat_id}: бот админ = {is_bot_admin}")
+                    print(f"[API] Чат {chat_id}: бот админ = {is_bot_admin}")
+                    
                     if not is_bot_admin:
+                        skipped_not_admin += 1
+                        logger.warning(f"[API] Чат {chat_id} пропущен: бот не является администратором")
+                        print(f"[API] Чат {chat_id} пропущен: бот не является администратором")
                         continue
                     
                     # Проверяем, является ли пользователь создателем
                     is_user_creator = await chat_service.is_user_creator(chat_id, user_id)
+                    logger.info(f"[API] Чат {chat_id}: пользователь {user_id} создатель = {is_user_creator}")
+                    print(f"[API] Чат {chat_id}: пользователь {user_id} создатель = {is_user_creator}")
+                    
                     if not is_user_creator:
+                        skipped_not_creator += 1
+                        logger.warning(f"[API] Чат {chat_id} пропущен: пользователь {user_id} не является создателем")
+                        print(f"[API] Чат {chat_id} пропущен: пользователь {user_id} не является создателем")
                         continue
                     
                     # Обновляем информацию о чате
                     updated = await chat_storage.update_chat_info(bot, chat_id)
                     if updated:
                         filtered_chats.append(updated)
+                        logger.info(f"[API] Чат {chat_id} добавлен в результат")
+                        print(f"[API] Чат {chat_id} добавлен в результат")
                     else:
                         filtered_chats.append(chat_data)
+                        logger.info(f"[API] Чат {chat_id} добавлен в результат (без обновления)")
+                        print(f"[API] Чат {chat_id} добавлен в результат (без обновления)")
                         
                 except TelegramError as e:
-                    logger.warning(f"Не удалось проверить чат {chat_data['id']}: {e}")
+                    logger.error(f"[API] Ошибка при проверке чата {chat_data.get('id', 'unknown')}: {e}")
+                    print(f"[API] Ошибка при проверке чата {chat_data.get('id', 'unknown')}: {e}")
                     continue
         
         # Запускаем async функцию
@@ -124,6 +161,11 @@ def get_chats():
             asyncio.set_event_loop(loop)
         
         loop.run_until_complete(filter_chats())
+        
+        logger.info(f"[API] Результат фильтрации: {len(filtered_chats)} чатов")
+        logger.info(f"[API] Пропущено (бот не админ): {skipped_not_admin}, (пользователь не создатель): {skipped_not_creator}")
+        print(f"[API] Результат фильтрации: {len(filtered_chats)} чатов")
+        print(f"[API] Пропущено (бот не админ): {skipped_not_admin}, (пользователь не создатель): {skipped_not_creator}")
         
         # Подсчитываем статистику
         stats = {
@@ -137,6 +179,9 @@ def get_chats():
         # Сортируем чаты по названию
         filtered_chats.sort(key=lambda x: x['title'].lower())
         
+        logger.info(f"[API] GET /api/chats - успешно возвращено {len(filtered_chats)} чатов")
+        print(f"[API] GET /api/chats - успешно возвращено {len(filtered_chats)} чатов")
+        
         return jsonify({
             'success': True,
             'chats': filtered_chats,
@@ -144,7 +189,8 @@ def get_chats():
         })
         
     except Exception as e:
-        logger.error(f"Ошибка при получении списка чатов: {e}", exc_info=True)
+        logger.error(f"[API] Ошибка при получении списка чатов: {e}", exc_info=True)
+        print(f"[API] Ошибка при получении списка чатов: {e}")
         return jsonify({
             'success': False,
             'error': 'Не удалось загрузить список чатов'
@@ -159,7 +205,12 @@ def get_chat_members(chat_id):
         data = request.get_json()
         user_id = data.get('user_id')
         
+        logger.info(f"[API] GET /api/chats/{chat_id}/members - запрос от пользователя {user_id}")
+        print(f"[API] GET /api/chats/{chat_id}/members - запрос от пользователя {user_id}")
+        
         if not user_id:
+            logger.warning(f"[API] GET /api/chats/{chat_id}/members - User ID не предоставлен")
+            print(f"[API] GET /api/chats/{chat_id}/members - User ID не предоставлен")
             return jsonify({
                 'success': False,
                 'error': 'User ID не предоставлен'
@@ -173,16 +224,24 @@ def get_chat_members(chat_id):
         async def check_and_get_members():
             # Проверяем, является ли пользователь создателем
             is_user_creator = await chat_service.is_user_creator(chat_id, user_id)
+            logger.info(f"[API] Чат {chat_id}: пользователь {user_id} создатель = {is_user_creator}")
+            print(f"[API] Чат {chat_id}: пользователь {user_id} создатель = {is_user_creator}")
+            
             if not is_user_creator:
                 return None, "Пользователь не является создателем группы"
             
             # Проверяем, является ли бот администратором
             is_bot_admin = await chat_service.is_bot_admin(chat_id)
+            logger.info(f"[API] Чат {chat_id}: бот админ = {is_bot_admin}")
+            print(f"[API] Чат {chat_id}: бот админ = {is_bot_admin}")
+            
             if not is_bot_admin:
                 return None, "Бот не является администратором группы"
             
             # Получаем список участников
             members = await chat_service.get_chat_members_list(chat_id)
+            logger.info(f"[API] Получено {len(members)} участников для чата {chat_id}")
+            print(f"[API] Получено {len(members)} участников для чата {chat_id}")
             return members, None
         
         # Запускаем async функцию
@@ -195,10 +254,15 @@ def get_chat_members(chat_id):
         members, error = loop.run_until_complete(check_and_get_members())
         
         if error:
+            logger.warning(f"[API] GET /api/chats/{chat_id}/members - ошибка: {error}")
+            print(f"[API] GET /api/chats/{chat_id}/members - ошибка: {error}")
             return jsonify({
                 'success': False,
                 'error': error
             }), 403
+        
+        logger.info(f"[API] GET /api/chats/{chat_id}/members - успешно возвращено {len(members)} участников")
+        print(f"[API] GET /api/chats/{chat_id}/members - успешно возвращено {len(members)} участников")
         
         return jsonify({
             'success': True,
@@ -206,13 +270,15 @@ def get_chat_members(chat_id):
         })
         
     except TelegramError as e:
-        logger.error(f"Ошибка Telegram API при получении участников: {e}")
+        logger.error(f"[API] Ошибка Telegram API при получении участников чата {chat_id}: {e}")
+        print(f"[API] Ошибка Telegram API при получении участников чата {chat_id}: {e}")
         return jsonify({
             'success': False,
             'error': f'Ошибка Telegram API: {str(e)}'
         }), 500
     except Exception as e:
-        logger.error(f"Ошибка при получении участников чата: {e}", exc_info=True)
+        logger.error(f"[API] Ошибка при получении участников чата {chat_id}: {e}", exc_info=True)
+        print(f"[API] Ошибка при получении участников чата {chat_id}: {e}")
         return jsonify({
             'success': False,
             'error': 'Не удалось загрузить список участников'

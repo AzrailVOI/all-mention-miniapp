@@ -29,11 +29,21 @@ class ChatStorageService:
                 'members_count': getattr(chat, 'members_count', None)
             }
             
+            is_new = chat.id not in self._chats
             self._chats[chat.id] = chat_data
-            logger.info(f"Зарегистрирован чат: {chat.id} ({chat.type})")
+            
+            if is_new:
+                logger.info(f"[ChatStorage] Зарегистрирован новый чат: {chat.id} ({chat.type}) - {chat_data['title']}")
+                print(f"[ChatStorage] Зарегистрирован новый чат: {chat.id} ({chat.type}) - {chat_data['title']}")
+            else:
+                logger.debug(f"[ChatStorage] Обновлен чат: {chat.id} ({chat.type}) - {chat_data['title']}")
+            
+            logger.info(f"[ChatStorage] Всего чатов в хранилище: {len(self._chats)}")
+            print(f"[ChatStorage] Всего чатов в хранилище: {len(self._chats)}")
             
         except Exception as e:
-            logger.error(f"Ошибка при регистрации чата: {e}")
+            logger.error(f"[ChatStorage] Ошибка при регистрации чата: {e}")
+            print(f"[ChatStorage] Ошибка при регистрации чата: {e}")
     
     def get_chat(self, chat_id: int) -> Optional[Dict]:
         """Получает информацию о чате"""
@@ -41,7 +51,10 @@ class ChatStorageService:
     
     def get_all_chats(self) -> List[Dict]:
         """Получает список всех зарегистрированных чатов"""
-        return list(self._chats.values())
+        chats = list(self._chats.values())
+        logger.info(f"[ChatStorage] Запрошен список чатов: возвращено {len(chats)} чатов")
+        print(f"[ChatStorage] Запрошен список чатов: возвращено {len(chats)} чатов")
+        return chats
     
     def get_chats_by_type(self, chat_type: str) -> List[Dict]:
         """Получает чаты по типу"""
