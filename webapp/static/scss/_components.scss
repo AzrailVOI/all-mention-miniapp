@@ -32,13 +32,37 @@
     margin-top: $spacing-xl;
     @include transition-all($transition-normal);
     transform: scale(1);
+    // Принудительно белый текст на черном фоне
+    color: $color-white !important;
+    
+    i {
+        color: $color-white !important;
+    }
     
     &:hover:not(:disabled) {
         transform: scale(1.02);
+        color: $color-white !important;  // Белый текст при hover
+        
+        i {
+            color: $color-white !important;
+        }
     }
     
     &:active:not(:disabled) {
         transform: scale(0.98);
+        color: $color-white !important;  // Белый текст при active
+        
+        i {
+            color: $color-white !important;
+        }
+    }
+    
+    &:disabled {
+        color: $color-white !important;  // Белый текст даже при disabled
+        
+        i {
+            color: $color-white !important;
+        }
     }
 }
 
@@ -47,10 +71,12 @@
     padding: $spacing-md;
     @include flex-center;
     min-width: 48px;
+    color: $color-white !important;  // Принудительно белый текст
     
     i {
         width: $spacing-xl;
         height: $spacing-xl;
+        color: $color-white !important;  // Белая иконка
     }
 }
 

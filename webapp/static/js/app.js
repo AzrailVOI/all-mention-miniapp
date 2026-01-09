@@ -185,9 +185,20 @@ function refreshChats() {
             window.showToast('Список чатов успешно обновлен', 'success');
         }
     }).catch((error) => {
-        // Показываем Toast об ошибке
+        // Логируем ошибку для отладки
+        console.error('[refreshChats] Ошибка при обновлении списка чатов:', error);
+        
+        // Показываем Toast об ошибке с деталями
+        const errorMessage = error.message || 'Ошибка при обновлении списка чатов';
         if (window.showToast) {
-            window.showToast('Ошибка при обновлении списка чатов', 'error');
+            window.showToast(errorMessage, 'error');
+        } else {
+            // Fallback: показываем ошибку в консоли
+            console.error('[refreshChats] Детали ошибки:', {
+                message: error.message,
+                stack: error.stack,
+                error: error
+            });
         }
     }).finally(() => {
         if (refreshBtn) {

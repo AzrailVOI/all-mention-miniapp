@@ -38,7 +38,7 @@
         gap: $spacing-sm;
         padding: $spacing-sm $spacing-md;
         background: $color-primary;
-        color: $color-white;
+        color: $color-white !important;  // Принудительно белый текст на черном фоне
         border: none;
         border-radius: $border-radius;
         font-size: $font-size-sm;
@@ -48,20 +48,25 @@
         
         &:hover:not(:disabled) {
             background: darken($color-primary, 10%);
+            color: $color-white !important;  // Белый текст при hover
             transform: translateY(-1px);
         }
         
         &:active:not(:disabled) {
+            background: darken($color-primary, 15%);
+            color: $color-white !important;  // Белый текст при active
             transform: translateY(0);
         }
         
         &:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+            color: $color-white !important;  // Белый текст даже при disabled
         }
         
         i {
             width: 16px;
+            color: $color-white !important;  // Белая иконка
             height: 16px;
         }
         
