@@ -14,14 +14,31 @@ function renderChats(chats, infoMessage, container) {
     if (!chats || chats.length === 0) {
         let emptyContent = `
             <div class="empty-state">
-                <i data-lucide="message-square" style="width: 48px; height: 48px; opacity: 0.3; margin-bottom: 16px;"></i>
-                <p>Бот еще не добавлен ни в один чат</p>
+                <div class="empty-state-icon">
+                    <i data-lucide="message-square"></i>
+                </div>
+                <h3 class="empty-state-title">Чаты не найдены</h3>
+                <p class="empty-state-description">Бот еще не добавлен ни в один чат или чаты не соответствуют фильтру</p>
         `;
         
         if (infoMessage) {
             emptyContent += `
-                <div style="margin-top: 20px; padding: 16px; background: #fafafa; border: 1px solid #e0e0e0; text-align: left; font-size: 13px; line-height: 1.6;">
-                    ${window.escapeHtml ? window.escapeHtml(infoMessage).replace(/\n/g, '<br>') : infoMessage.replace(/\n/g, '<br>')}
+                <div class="empty-state-info">
+                    <div class="empty-state-info-icon">
+                        <i data-lucide="info"></i>
+                    </div>
+                    <div class="empty-state-info-content">
+                        ${window.escapeHtml ? window.escapeHtml(infoMessage).replace(/\n/g, '<br>') : infoMessage.replace(/\n/g, '<br>')}
+                    </div>
+                </div>
+            `;
+        } else {
+            emptyContent += `
+                <div class="empty-state-actions">
+                    <button class="refresh-btn" onclick="refreshChats()">
+                        <i data-lucide="refresh-cw"></i>
+                        <span>Обновить список</span>
+                    </button>
                 </div>
             `;
         }
@@ -80,6 +97,9 @@ function renderChats(chats, infoMessage, container) {
             <div class="chat-arrow">
                 <i data-lucide="chevron-right"></i>
             </div>
+            <button class="chat-delete-btn" onclick="event.stopPropagation(); deleteChat(${chat.id}, '${chatTitle.replace(/'/g, "\\'")}')" title="Удалить чат из списка">
+                <i data-lucide="trash-2"></i>
+            </button>
         </div>
     `;
     }).join('');

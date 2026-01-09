@@ -1,0 +1,139 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, develop, master ]
+  pull_request:
+    branches: [ main, develop, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Cache pip packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Set up environment variables for tests
+      run: |
+        echo "BOT_TOKEN=test_token_123456789" >> $GITHUB_ENV
+        echo "WEBAPP_URL=http://localhost:5000" >> $GITHUB_ENV
+        echo "WEBAPP_HOST=0.0.0.0" >> $GITHUB_ENV
+        echo "WEBAPP_PORT=5000" >> $GITHUB_ENV
+        echo "LOG_LEVEL=INFO" >> $GITHUB_ENV
+        echo "USE_JSON_LOGGING=false" >> $GITHUB_ENV
+        echo "COMPILE_SCSS=false" >> $GITHUB_ENV
+
+    - name: Run all tests with coverage
+      run: |
+        pytest tests/ \
+          -v --tb=short \
+          --cov=bot --cov=webapp \
+          --cov-report=term-missing --cov-report=xml \
+          --cov-report=html
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      if: matrix.python-version == '3.11'
+      with:
+        files: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+        token: ${{ secrets.CODECOV_TOKEN }}
+
+    - name: Upload coverage HTML report
+      uses: actions/upload-artifact@v4
+      if: matrix.python-version == '3.11'
+      with:
+        name: coverage-report
+        path: htmlcov/
+        retention-days: 30
+
+    - name: Run mypy type checking
+      run: |
+        pip install mypy
+        mypy bot webapp --config-file mypy.ini || true
+
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install flake8 black isort
+
+    - name: Check code formatting with black
+      run: |
+        black --check bot webapp tests || true
+
+    - name: Check import sorting with isort
+      run: |
+        isort --check-only bot webapp tests || true
+
+    - name: Lint with flake8
+      run: |
+        flake8 bot webapp tests --count --select=E9,F63,F7,F82 --show-source --statistics || true
+        flake8 bot webapp tests --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics || true
+
+  security:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install bandit safety
+
+    - name: Run Bandit security scan
+      run: |
+        bandit -r bot webapp -f json -o bandit-report.json || true
+        bandit -r bot webapp || true
+
+    - name: Check for known security vulnerabilities
+      run: |
+        safety check --json || true
+        safety check || true

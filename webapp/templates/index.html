@@ -16,10 +16,16 @@
         <div class="header">
             <h1>Мои чаты</h1>
             <p>Список чатов, где добавлен бот</p>
-            <button id="toggleAllBtn" class="toggle-all-btn" onclick="toggleAllBlocks()" title="Развернуть статистику">
-                <i data-lucide="chevron-down"></i>
-                <span class="toggle-all-text">Развернуть статистику</span>
-            </button>
+            <div class="header-actions">
+                <button id="refreshBtn" class="refresh-btn" onclick="refreshChats()" title="Обновить список чатов">
+                    <i data-lucide="refresh-cw"></i>
+                    <span>Обновить</span>
+                </button>
+                <button id="toggleAllBtn" class="toggle-all-btn" onclick="toggleAllBlocks()" title="Развернуть статистику">
+                    <i data-lucide="chevron-down"></i>
+                    <span class="toggle-all-text">Развернуть статистику</span>
+                </button>
+            </div>
         </div>
         
         <div class="stats"></div>
@@ -27,6 +33,27 @@
         <div class="chats-section expanded">
             <div class="section-title">
                 <span>Список чатов</span>
+            </div>
+            
+            <div class="filters-container">
+                <button class="filter-btn active" data-filter="all" onclick="filterChats('all')">
+                    <span>Все</span>
+                </button>
+                <button class="filter-btn" data-filter="group" onclick="filterChats('group')">
+                    <span>Группы</span>
+                </button>
+                <button class="filter-btn" data-filter="supergroup" onclick="filterChats('supergroup')">
+                    <span>Супергруппы</span>
+                </button>
+            </div>
+            
+            <div class="sort-container">
+                <label for="sortSelect" class="sort-label">Сортировка:</label>
+                <select id="sortSelect" class="sort-select" onchange="sortChats(this.value)">
+                    <option value="title">По названию</option>
+                    <option value="members">По участникам</option>
+                    <option value="type">По типу</option>
+                </select>
             </div>
             
             <div class="search-container">
@@ -44,6 +71,7 @@
     
     <!-- Модули: базовые утилиты -->
     <script src="{{ url_for('static', filename='js/utils.js') }}?v={{ version }}"></script>
+    <script src="{{ url_for('static', filename='js/utils/offline.js') }}?v={{ version }}"></script>
     
     <!-- Модули: API -->
     <script src="{{ url_for('static', filename='js/api/chats-api.js') }}?v={{ version }}"></script>
@@ -54,10 +82,12 @@
     
     <!-- Модули: UI -->
     <script src="{{ url_for('static', filename='js/ui/loading.js') }}?v={{ version }}"></script>
+    <script src="{{ url_for('static', filename='js/ui/skeleton.js') }}?v={{ version }}"></script>
     <script src="{{ url_for('static', filename='js/ui/search.js') }}?v={{ version }}"></script>
     <script src="{{ url_for('static', filename='js/ui/navigation.js') }}?v={{ version }}"></script>
     <script src="{{ url_for('static', filename='js/ui/errors.js') }}?v={{ version }}"></script>
     <script src="{{ url_for('static', filename='js/ui/collapse.js') }}?v={{ version }}"></script>
+    <script src="{{ url_for('static', filename='js/ui/toast.js') }}?v={{ version }}"></script>
     
     <!-- Основной файл приложения -->
     <script src="{{ url_for('static', filename='js/app.js') }}?v={{ version }}"></script>

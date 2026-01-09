@@ -41,3 +41,22 @@ Thumbs.db
 
 # SCSS
 *.css.map
+
+# Testing
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.tox/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Type checking
+*.pyi# CI/CD artifacts
+bandit-report.json
+.bandit
+
+# Project specific
+chats_storage.json
+*.log

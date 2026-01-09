@@ -27,6 +27,11 @@ if (chatTitleElement) {
 
 // Инициализация
 document.addEventListener('DOMContentLoaded', async () => {
+    // Инициализируем обработчики offline режима
+    if (window.Offline && window.Offline.initOfflineHandlers) {
+        window.Offline.initOfflineHandlers();
+    }
+    
     // Инициализируем иконки Lucide
     if (window.lucide) {
         window.lucide.createIcons();
@@ -71,8 +76,10 @@ async function loadMembersData(chatId) {
     try {
         console.log(`[Members] Загрузка участников для чата: ${chatId}`);
         
-        // Показываем загрузку
-        if (window.Loading) {
+        // Показываем skeleton screens вместо простого спиннера
+        if (window.Skeleton && membersList) {
+            window.Skeleton.showMembers(membersList, 10);
+        } else if (window.Loading) {
             window.Loading.show(loadingElement, membersList);
         } else {
             if (loadingElement) loadingElement.style.display = 'block';
@@ -83,6 +90,11 @@ async function loadMembersData(chatId) {
         const data = await window.MembersAPI.loadMembers(chatId);
         
         console.log(`[Members] Данные получены:`, data);
+        
+        // Скрываем skeleton screens
+        if (window.Skeleton && membersList) {
+            window.Skeleton.hide(membersList);
+        }
         
         // Отображаем участников
         if (window.MembersRender && membersList) {

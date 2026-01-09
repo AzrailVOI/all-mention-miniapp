@@ -47,6 +47,36 @@ python main.py
 3. Дайте боту права на удаление сообщений
 4. Используйте триггеры `@all`, `@everybody_mention_bot` или `@everyone` в сообщениях
 
+## Тестирование
+
+### Запуск тестов локально
+
+```bash
+# Установить зависимости для тестирования
+pip install -r requirements.txt
+
+# Запустить все тесты
+pytest tests/
+
+# Запустить тесты с покрытием кода
+pytest tests/ --cov=bot --cov=webapp --cov-report=html
+```
+
+Подробная документация по тестированию и CI/CD: [CI_CD_SETUP.md](CI_CD_SETUP.md)
+
+## CI/CD
+
+Проект использует GitHub Actions для автоматического запуска тестов при каждом push и pull request.
+
+Workflow включает:
+- ✅ Запуск всех тестов (unit, integration) на Python 3.9-3.12
+- ✅ Покрытие кода и загрузка в Codecov
+- ✅ Проверка качества кода (black, isort, flake8)
+- ✅ Проверка типов (mypy)
+- ✅ Проверка безопасности (Bandit, Safety)
+
+См. `.github/workflows/tests.yml` для деталей.
+
 ## Настройка Mini App
 
 1. **Для локальной разработки:**

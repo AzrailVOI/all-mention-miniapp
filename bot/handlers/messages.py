@@ -9,6 +9,7 @@ from bot.services.chat_service import ChatService
 from bot.services.mention_service import MentionService
 from bot.services.chat_storage_service import chat_storage
 from bot.config import Config
+from bot.constants import ChatType
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +50,7 @@ class MessageHandler:
         logger.info(f"[MessageHandler] Найден триггер упоминания в чате {chat_id}, обрабатываем...")
         
         # Проверяем, что это группа или супергруппа
-        if chat.type not in ["group", "supergroup"]:
+        if not ChatType.is_group(chat.type):
             await context.bot.send_message(
                 chat_id=chat_id,
                 text="Эта команда работает только в группах."

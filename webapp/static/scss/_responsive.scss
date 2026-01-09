@@ -1,42 +1,224 @@
 // Адаптивные стили
 
 @include mobile {
+    // Улучшенные touch targets (минимум 44x44px для мобильных)
+    .toggle-all-btn,
+    .refresh-btn,
+    .search-btn,
+    .filter-btn,
+    .back-btn,
+    .member-profile-btn,
+    .modal-close,
+    .toast-close {
+        min-width: 44px;
+        min-height: 44px;
+        padding: $spacing-sm $spacing-md;
+    }
+    
+    // Улучшенные шрифты для мобильных
     .header h1 {
+        font-size: $font-size-xxl;
+        line-height: 1.2;
+    }
+    
+    .header p {
+        font-size: $font-size-sm;
+    }
+    
+    .chat-name {
+        font-size: $font-size-base;
+    }
+    
+    .member-name {
+        font-size: $font-size-base;
+    }
+    
+    .stat-value {
         font-size: $font-size-xxl;
     }
     
+    .stat-label {
+        font-size: $font-size-xs;
+    }
+    
+    // Скрываем текст на кнопках для экономии места
     .toggle-all-text {
         display: none;
     }
     
     .toggle-all-btn {
-        padding: 10px;
-        min-width: 40px;
+        padding: $spacing-sm;
+        min-width: 44px;
     }
     
-    .stats {
-        grid-template-columns: 1fr;
-    }
-    
-    .chat-item {
-        flex-direction: column;
-        text-align: center;
-    }
-    
-    .chat-icon {
-        margin-right: 0;
-        margin-bottom: 10px;
-    }
-    
-    .chat-arrow {
+    .refresh-btn span {
         display: none;
     }
     
-    .search-container {
+    .refresh-btn {
+        padding: $spacing-sm $spacing-md;
+        min-width: 44px;
+    }
+    
+    // Улучшенная статистика
+    .stats {
+        grid-template-columns: 1fr;
+        gap: $spacing-md;
+    }
+    
+    .stat-card {
+        padding: $spacing-lg;
+    }
+    
+    // Улучшенные элементы чатов
+    .chat-item {
+        padding: $spacing-md;
+        min-height: 60px; // Улучшенный touch target
+    }
+    
+    .chat-avatar,
+    .chat-icon {
+        width: 56px;
+        height: 56px;
+        margin-right: $spacing-md;
+    }
+    
+    .chat-arrow {
+        min-width: 44px;
+        min-height: 44px;
+        @include flex-center;
+    }
+    
+    // Улучшенные фильтры и сортировка
+    .filters-container {
+        gap: $spacing-xs;
+    }
+    
+    .filter-btn {
+        padding: $spacing-sm $spacing-sm;
+        font-size: $font-size-xs;
+        min-height: 44px;
+    }
+    
+    .sort-container {
         flex-direction: column;
+        align-items: stretch;
+        gap: $spacing-xs;
+    }
+    
+    .sort-label {
+        font-size: $font-size-xs;
+    }
+    
+    .sort-select {
+        padding: $spacing-sm $spacing-md;
+        min-height: 44px;
+        font-size: $font-size-sm;
+    }
+    
+    // Улучшенный поиск
+    .search-container {
+        flex-direction: row;
+        gap: $spacing-sm;
+    }
+    
+    .search-input {
+        padding: $spacing-sm $spacing-md;
+        font-size: $font-size-base;
+        min-height: 44px;
+    }
+    
+    .search-btn {
+        min-width: 44px;
+        min-height: 44px;
+    }
+    
+    // Улучшенные участники
+    .member-item {
+        padding: $spacing-md;
+        min-height: 60px;
+    }
+    
+    .member-avatar {
+        width: 48px;
+        height: 48px;
+        margin-right: $spacing-md;
+    }
+    
+    // Улучшенные пустые состояния
+    .empty-state {
+        padding: $spacing-xl $spacing-lg;
+    }
+    
+    .empty-state-icon i {
+        width: 56px;
+        height: 56px;
+    }
+    
+    .empty-state-title {
+        font-size: $font-size-lg;
+    }
+    
+    .empty-state-description {
+        font-size: $font-size-sm;
+    }
+    
+    .empty-state-actions .refresh-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    // Улучшенные модальные окна
+    .modal {
+        padding: $spacing-md;
     }
     
     .modal-content {
         max-height: 90vh;
+        max-width: 100%;
+    }
+    
+    .modal-header,
+    .modal-body {
+        padding: $spacing-lg;
+    }
+    
+    // Улучшенные Toast уведомления
+    .toast-container {
+        top: $spacing-sm;
+        right: $spacing-sm;
+        left: $spacing-sm;
+        max-width: none;
+    }
+    
+    .toast {
+        padding: $spacing-md;
+    }
+    
+    .toast-message {
+        font-size: $font-size-sm;
+    }
+    
+    // Улучшенные кнопки в header
+    .header-actions {
+        flex-direction: column;
+        width: 100%;
+        gap: $spacing-sm;
+    }
+    
+    .header-actions .refresh-btn,
+    .header-actions .toggle-all-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    // Улучшенные секции
+    .chats-section {
+        padding: $spacing-lg;
+    }
+    
+    .section-title {
+        font-size: $font-size-xs;
+        margin-bottom: $spacing-md;
     }
 }

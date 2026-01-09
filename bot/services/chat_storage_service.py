@@ -2,25 +2,28 @@
 import logging
 import json
 import os
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 from datetime import datetime
 from telegram import Chat, Bot
 
 logger = logging.getLogger(__name__)
 
 # Глобальный экземпляр сервиса хранения чатов
-chat_storage = None
+chat_storage: Optional['ChatStorageService'] = None
 
 # Путь к файлу для сохранения чатов
 STORAGE_FILE = "chats_storage.json"
+
+# Тип для данных чата
+ChatData = Dict[str, Any]
 
 
 class ChatStorageService:
     """Сервис для хранения и получения информации о чатах"""
     
-    def __init__(self, storage_file: str = STORAGE_FILE):
+    def __init__(self, storage_file: str = STORAGE_FILE) -> None:
         # In-memory хранилище (можно заменить на БД)
-        self._chats: Dict[int, Dict] = {}
+        self._chats: Dict[int, ChatData] = {}
         self._storage_file = storage_file
         # Загружаем чаты из файла при инициализации
         self._load_from_file()
@@ -53,40 +56,69 @@ class ChatStorageService:
         except Exception as e:
             logger.error(f"[ChatStorage] Ошибка при регистрации чата: {e}")
     
-    def get_chat(self, chat_id: int) -> Optional[Dict]:
+    def get_chat(self, chat_id: int) -> Optional[ChatData]:
         """Получает информацию о чате"""
         return self._chats.get(chat_id)
     
-    def get_all_chats(self) -> List[Dict]:
+    def get_all_chats(self) -> List[ChatData]:
         """Получает список всех зарегистрированных чатов"""
         chats = list(self._chats.values())
         logger.info(f"[ChatStorage] Запрошен список чатов: возвращено {len(chats)} чатов")
         return chats
     
-    def get_chats_by_type(self, chat_type: str) -> List[Dict]:
+    def get_chats_by_type(self, chat_type: str) -> List[ChatData]:
         """Получает чаты по типу"""
-        return [chat for chat in self._chats.values() if chat['type'] == chat_type]
+        return [chat for chat in self._chats.values() if chat.get('type') == chat_type]
     
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> Dict[str, int]:
         """Получает статистику по чатам"""
         all_chats = self.get_all_chats()
         
-        stats = {
+        stats: Dict[str, int] = {
             'total': len(all_chats),
-            'groups': len([c for c in all_chats if c['type'] == 'group']),
-            'supergroups': len([c for c in all_chats if c['type'] == 'supergroup']),
-            'private': len([c for c in all_chats if c['type'] == 'private']),
-            'channels': len([c for c in all_chats if c['type'] == 'channel'])
+            'groups': len([c for c in all_chats if c.get('type') == 'group']),
+            'supergroups': len([c for c in all_chats if c.get('type') == 'supergroup']),
+            'private': len([c for c in all_chats if c.get('type') == 'private']),
+            'channels': len([c for c in all_chats if c.get('type') == 'channel'])
         }
         
         return stats
     
-    async def update_chat_info(self, bot: Bot, chat_id: int) -> Optional[Dict]:
+    def remove_chat(self, chat_id: int) -> bool:
+        """
+        Удаляет чат из хранилища.
+        
+        Args:
+            chat_id: ID чата для удаления.
+            
+        Returns:
+            True, если чат был удален, False если чат не найден.
+        """
+        try:
+            if chat_id not in self._chats:
+                logger.warning(f"[ChatStorage] Попытка удалить несуществующий чат: {chat_id}")
+                return False
+            
+            chat_data = self._chats[chat_id]
+            del self._chats[chat_id]
+            
+            # Сохраняем в файл
+            self._save_to_file()
+            
+            logger.info(f"[ChatStorage] Чат удален: {chat_id} ({chat_data.get('type')}) - {chat_data.get('title')}")
+            logger.info(f"[ChatStorage] Всего чатов в хранилище: {len(self._chats)}")
+            
+            return True
+        except Exception as e:
+            logger.error(f"[ChatStorage] Ошибка при удалении чата {chat_id}: {e}")
+            return False
+    
+    async def update_chat_info(self, bot: Bot, chat_id: int) -> Optional[ChatData]:
         """Обновляет информацию о чате из Telegram API"""
         try:
             chat = await bot.get_chat(chat_id)
             
-            chat_data = {
+            chat_data: ChatData = {
                 'id': chat.id,
                 'title': chat.title or chat.first_name or 'Без названия',
                 'type': chat.type,
@@ -123,7 +155,7 @@ class ChatStorageService:
         try:
             if os.path.exists(self._storage_file):
                 with open(self._storage_file, 'r', encoding='utf-8') as f:
-                    loaded_chats = json.load(f)
+                    loaded_chats: Dict[str, Any] = json.load(f)
                     # Конвертируем ключи обратно в int
                     self._chats = {int(k): v for k, v in loaded_chats.items()}
                 logger.info(f"[ChatStorage] Загружено {len(self._chats)} чатов из файла: {self._storage_file}")

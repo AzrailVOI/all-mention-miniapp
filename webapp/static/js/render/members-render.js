@@ -13,8 +13,20 @@ function renderMembers(members, container) {
     if (!members || members.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
-                <i data-lucide="users" style="width: 48px; height: 48px; opacity: 0.3; margin-bottom: 16px;"></i>
-                <p>Участники не найдены</p>
+                <div class="empty-state-icon">
+                    <i data-lucide="users"></i>
+                </div>
+                <h3 class="empty-state-title">Участники не найдены</h3>
+                <p class="empty-state-description">
+                    В этом чате нет участников или они недоступны.<br>
+                    Убедитесь, что бот является администратором чата.
+                </p>
+                <div class="empty-state-actions">
+                    <button class="refresh-btn" onclick="location.reload()">
+                        <i data-lucide="refresh-cw"></i>
+                        <span>Обновить</span>
+                    </button>
+                </div>
             </div>
         `;
         

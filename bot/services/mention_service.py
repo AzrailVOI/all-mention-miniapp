@@ -11,26 +11,61 @@ logger = logging.getLogger(__name__)
 
 
 class MentionService:
-    """Сервис для обработки упоминаний участников"""
+    """
+    Сервис для обработки упоминаний участников в чатах.
+    
+    Предоставляет методы для проверки триггеров упоминания, форматирования
+    сообщений с упоминаниями и отправки/удаления сообщений.
+    """
     
     def __init__(self, bot: Bot):
+        """
+        Инициализирует сервис с экземпляром бота.
+        
+        Args:
+            bot: Экземпляр Telegram Bot для выполнения API запросов
+        """
         self.bot = bot
         self.config = Config
     
     def extract_cleaned_text(self, text: str) -> str:
-        """Удаляет триггеры упоминания из текста"""
+        """
+        Удаляет триггеры упоминания из текста.
+        
+        Args:
+            text: Исходный текст сообщения
+            
+        Returns:
+            Текст без триггеров упоминания (@all, @everyone, и т.д.)
+        """
         cleaned = text
         for trigger in self.config.MENTION_TRIGGERS:
             cleaned = cleaned.replace(trigger, "").replace(trigger.lower(), "")
         return cleaned.strip()
     
     def has_mention_trigger(self, text: str) -> bool:
-        """Проверяет, содержит ли текст триггер упоминания"""
+        """
+        Проверяет, содержит ли текст триггер упоминания.
+        
+        Args:
+            text: Текст для проверки
+            
+        Returns:
+            True если текст содержит один из триггеров упоминания, False в противном случае
+        """
         text_lower = text.lower()
         return any(trigger.lower() in text_lower for trigger in self.config.MENTION_TRIGGERS)
     
     def format_user_tags(self, users: List[User]) -> List[str]:
-        """Форматирует список пользователей в теги"""
+        """
+        Форматирует список пользователей в теги для упоминания.
+        
+        Args:
+            users: Список объектов User из Telegram
+            
+        Returns:
+            Список строк с тегами пользователей (@username или first_name)
+        """
         tags = []
         for user in users:
             if user.username:
@@ -47,10 +82,15 @@ class MentionService:
         users: List[User]
     ) -> Optional[str]:
         """
-        Строит сообщение с упоминаниями участников
+        Строит сообщение с упоминаниями участников.
         
+        Args:
+            mention_msg: Модель сообщения с упоминанием
+            users: Список пользователей для упоминания
+            
         Returns:
-            Строка с сообщением или None, если сообщение слишком длинное
+            Строка с сообщением и тегами пользователей, или None если сообщение
+            превышает максимальную длину (MAX_MESSAGE_LENGTH)
         """
         tags = self.format_user_tags(users)
         tags_text = " ".join(tags)
@@ -68,7 +108,16 @@ class MentionService:
         chat_id: int, 
         message: str
     ) -> bool:
-        """Отправляет сообщение с упоминаниями"""
+        """
+        Отправляет сообщение с упоминаниями в чат.
+        
+        Args:
+            chat_id: ID чата для отправки сообщения
+            message: Текст сообщения (поддерживает HTML форматирование)
+            
+        Returns:
+            True если сообщение успешно отправлено, False в случае ошибки
+        """
         try:
             await self.bot.send_message(
                 chat_id=chat_id,
@@ -85,7 +134,19 @@ class MentionService:
         chat_id: int, 
         message_id: int
     ) -> bool:
-        """Удаляет оригинальное сообщение"""
+        """
+        Удаляет оригинальное сообщение из чата.
+        
+        Args:
+            chat_id: ID чата
+            message_id: ID сообщения для удаления
+            
+        Returns:
+            True если сообщение успешно удалено, False в случае ошибки
+            
+        Note:
+            Бот должен иметь права на удаление сообщений в чате.
+        """
         try:
             await self.bot.delete_message(
                 chat_id=chat_id,

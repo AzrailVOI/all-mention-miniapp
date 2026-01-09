@@ -1,19 +1,22 @@
 """Главный файл запуска бота"""
 import logging
+import os
 import threading
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
 from bot.config import Config
-from bot.handlers.commands import start_command, chats_command, register_chat_command
+from bot.handlers.commands import start_command, chats_command, register_chat_command, stats_command, help_command
 from bot.handlers.messages import handle_text_message
 from bot.handlers.chat_events import handle_chat_member_update, handle_my_chat_member_update
 
-# Настройка логирования
-logging.basicConfig(
-    format=Config.LOG_FORMAT,
-    level=getattr(logging, Config.LOG_LEVEL.upper())
-)
+# Настройка структурированного логирования
+from bot.utils.logging_config import setup_logging
+
+# Определяем, использовать ли JSON формат (для продакшена)
+use_json_logging = os.getenv('USE_JSON_LOGGING', 'false').lower() == 'true'
+setup_logging(use_json=use_json_logging)
+
 logger = logging.getLogger(__name__)
 
 
@@ -61,6 +64,8 @@ def main() -> None:
     application.add_handler(CommandHandler("start", start_command))
     application.add_handler(CommandHandler("chats", chats_command))
     application.add_handler(CommandHandler("register", register_chat_command))
+    application.add_handler(CommandHandler("stats", stats_command))
+    application.add_handler(CommandHandler("help", help_command))
     
     # Обработчик всех сообщений для регистрации чатов и обработки упоминаний
     # handle_text_message уже регистрирует чат для всех сообщений и обрабатывает упоминания для текстовых

@@ -15,8 +15,18 @@ const statsContainer = document.querySelector('.stats');
 const chatsContainer = document.querySelector('.chat-list');
 const loadingElement = document.querySelector('.loading');
 
+// Состояние фильтрации и сортировки
+let currentFilter = 'all';
+let currentSort = 'title';
+let allChats = []; // Сохраняем все чаты для фильтрации
+
 // Инициализация
 document.addEventListener('DOMContentLoaded', async () => {
+    // Инициализируем обработчики offline режима
+    if (window.Offline && window.Offline.initOfflineHandlers) {
+        window.Offline.initOfflineHandlers();
+    }
+    
     // Инициализируем иконки Lucide
     if (window.lucide) {
         window.lucide.createIcons();
@@ -43,14 +53,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     await loadChatsData();
     
-    // Обработчик кнопки обновления
-    const refreshBtn = document.querySelector('.refresh-btn');
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', async () => {
-            await loadChatsData();
-        });
-    }
-    
     // Обработчик поиска по Enter
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
@@ -64,11 +66,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 /**
  * Загружает и отображает список чатов
+ * @param {boolean} forceRefresh - Принудительное обновление (инвалидация кэша)
  */
-async function loadChatsData() {
+async function loadChatsData(forceRefresh = false) {
     try {
-        // Показываем загрузку
-        if (window.Loading) {
+        // Показываем skeleton screens вместо простого спиннера
+        if (window.Skeleton) {
+            if (statsContainer) {
+                window.Skeleton.showStats(statsContainer, 3);
+            }
+            if (chatsContainer) {
+                window.Skeleton.showChats(chatsContainer, 5);
+            }
+        } else if (window.Loading) {
             window.Loading.show(loadingElement, chatsContainer);
         } else {
             if (loadingElement) loadingElement.style.display = 'block';
@@ -76,16 +86,30 @@ async function loadChatsData() {
         }
         
         // Загружаем данные через API
-        const data = await window.ChatsAPI.loadChats();
+        const data = await window.ChatsAPI.loadChats(forceRefresh);
+        
+        // Показываем предупреждение, если данные из кэша
+        if (data.cached && data.warning) {
+            if (window.showToast) {
+                window.showToast(data.warning, 'warning');
+            }
+        }
         
         // Отображаем статистику
         if (window.StatsRender && statsContainer) {
             window.StatsRender.renderStats(data.stats, statsContainer);
         }
         
+        // Сохраняем все чаты для фильтрации
+        allChats = data.chats || [];
+        
+        // Применяем фильтр и сортировку
+        const filteredChats = applyFilter(allChats, currentFilter);
+        const sortedChats = applySort(filteredChats, currentSort);
+        
         // Отображаем список чатов
         if (window.ChatsRender && chatsContainer) {
-            window.ChatsRender.renderChats(data.chats, data.info, chatsContainer);
+            window.ChatsRender.renderChats(sortedChats, data.info, chatsContainer);
         }
         
     } catch (error) {
@@ -142,5 +166,185 @@ function performSearchHandler() {
     }
 }
 
+/**
+ * Обновляет список чатов (с инвалидацией кэша)
+ */
+function refreshChats() {
+    const refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+        refreshBtn.disabled = true;
+        const icon = refreshBtn.querySelector('i');
+        if (icon) {
+            icon.style.animation = 'spin 1s linear infinite';
+        }
+    }
+    
+    loadChatsData(true).then(() => {
+        // Показываем Toast об успешном обновлении
+        if (window.showToast) {
+            window.showToast('Список чатов успешно обновлен', 'success');
+        }
+    }).catch((error) => {
+        // Показываем Toast об ошибке
+        if (window.showToast) {
+            window.showToast('Ошибка при обновлении списка чатов', 'error');
+        }
+    }).finally(() => {
+        if (refreshBtn) {
+            refreshBtn.disabled = false;
+            const icon = refreshBtn.querySelector('i');
+            if (icon) {
+                icon.style.animation = '';
+            }
+        }
+    });
+}
+
+/**
+ * Применяет фильтр к списку чатов
+ * @param {Array} chats - Список чатов
+ * @param {string} filterType - Тип фильтра ('all', 'group', 'supergroup')
+ * @returns {Array} Отфильтрованный список чатов
+ */
+function applyFilter(chats, filterType) {
+    if (filterType === 'all') {
+        return chats;
+    }
+    return chats.filter(chat => chat.type === filterType);
+}
+
+/**
+ * Фильтрует чаты по типу
+ * @param {string} filterType - Тип фильтра ('all', 'group', 'supergroup')
+ */
+function filterChats(filterType) {
+    currentFilter = filterType;
+    
+    // Обновляем активную кнопку
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        if (btn.dataset.filter === filterType) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    
+    // Применяем фильтр и сортировку
+    const filteredChats = applyFilter(allChats, filterType);
+    const sortedChats = applySort(filteredChats, currentSort);
+    
+    // Формируем сообщение для пустого состояния после фильтрации
+    let emptyMessage = null;
+    if (sortedChats.length === 0 && allChats.length > 0) {
+        const filterLabels = {
+            'all': 'всех',
+            'group': 'групп',
+            'supergroup': 'супергрупп'
+        };
+        emptyMessage = `Не найдено ${filterLabels[filterType] || 'чатов'} по выбранному фильтру.\n\nПопробуйте выбрать другой фильтр или обновить список чатов.`;
+    }
+    
+    // Перерисовываем список чатов
+    if (window.ChatsRender && chatsContainer) {
+        window.ChatsRender.renderChats(sortedChats, emptyMessage, chatsContainer);
+    }
+}
+
+/**
+ * Сортирует чаты
+ * @param {string} sortType - Тип сортировки ('title', 'members', 'type')
+ */
+function sortChats(sortType) {
+    currentSort = sortType;
+    
+    // Применяем фильтр и сортировку
+    const filteredChats = applyFilter(allChats, currentFilter);
+    const sortedChats = applySort(filteredChats, currentSort);
+    
+    // Перерисовываем список чатов
+    if (window.ChatsRender && chatsContainer) {
+        window.ChatsRender.renderChats(sortedChats, null, chatsContainer);
+    }
+}
+
+/**
+ * Удаляет чат из списка с подтверждением
+ * @param {number} chatId - ID чата
+ * @param {string} chatTitle - Название чата
+ */
+async function deleteChat(chatId, chatTitle) {
+    // Показываем подтверждение
+    const confirmed = confirm(`Вы уверены, что хотите удалить чат "${chatTitle}" из списка?\n\nЭто действие нельзя отменить.`);
+    
+    if (!confirmed) {
+        return;
+    }
+    
+    try {
+        const tg = window.Telegram.WebApp;
+        const initData = tg.initData;
+        const user = tg.initDataUnsafe?.user;
+        
+        const response = await fetch(`/api/chats/${chatId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                init_data: initData,
+                user_id: user?.id
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok || !data.success) {
+            throw new Error(data.error || 'Не удалось удалить чат');
+        }
+        
+        // Показываем уведомление об успехе
+        if (window.showToast) {
+            window.showToast(`Чат "${chatTitle}" успешно удален`, 'success');
+        }
+        
+        // Удаляем чат из локального списка
+        allChats = allChats.filter(chat => chat.id !== chatId);
+        
+        // Применяем фильтр и сортировку
+        const filteredChats = applyFilter(allChats, currentFilter);
+        const sortedChats = applySort(filteredChats, currentSort);
+        
+        // Перерисовываем список чатов
+        if (window.ChatsRender && chatsContainer) {
+            window.ChatsRender.renderChats(sortedChats, null, chatsContainer);
+        }
+        
+        // Обновляем статистику
+        if (window.StatsRender && statsContainer) {
+            const stats = {
+                total: allChats.length,
+                groups: allChats.filter(c => c.type === 'group').length,
+                supergroups: allChats.filter(c => c.type === 'supergroup').length,
+                private: 0,
+                channels: 0
+            };
+            window.StatsRender.renderStats(stats, statsContainer);
+        }
+        
+    } catch (error) {
+        console.error('[App] Ошибка при удалении чата:', error);
+        
+        // Показываем ошибку
+        const errorMessage = error.message || 'Не удалось удалить чат';
+        if (window.showToast) {
+            window.showToast(errorMessage, 'error');
+        }
+    }
+}
+
 // Экспорт для использования в HTML (onclick)
 window.performSearch = performSearchHandler;
+window.refreshChats = refreshChats;
+window.filterChats = filterChats;
+window.sortChats = sortChats;
+window.deleteChat = deleteChat;
