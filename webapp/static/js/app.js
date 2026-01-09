@@ -10,10 +10,10 @@ const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
 
-// Элементы DOM (объявляем как let, чтобы избежать ошибок инициализации)
-let statsContainer = null;
-let chatsContainer = null;
-let loadingElement = null;
+// Элементы DOM
+const statsContainer = document.querySelector('.stats');
+const chatsContainer = document.querySelector('.chat-list');
+const loadingElement = document.querySelector('.loading');
 
 // Состояние фильтрации и сортировки
 let currentFilter = 'all';
@@ -22,11 +22,6 @@ let allChats = []; // Сохраняем все чаты для фильтрац
 
 // Инициализация
 document.addEventListener('DOMContentLoaded', async () => {
-    // Инициализируем элементы DOM после загрузки
-    statsContainer = document.querySelector('.stats');
-    chatsContainer = document.querySelector('.chat-list');
-    loadingElement = document.querySelector('.loading');
-    
     // Инициализируем обработчики offline режима
     if (window.Offline && window.Offline.initOfflineHandlers) {
         window.Offline.initOfflineHandlers();
@@ -190,20 +185,9 @@ function refreshChats() {
             window.showToast('Список чатов успешно обновлен', 'success');
         }
     }).catch((error) => {
-        // Логируем ошибку для отладки
-        console.error('[refreshChats] Ошибка при обновлении списка чатов:', error);
-        
-        // Показываем Toast об ошибке с деталями
-        const errorMessage = error.message || 'Ошибка при обновлении списка чатов';
+        // Показываем Toast об ошибке
         if (window.showToast) {
-            window.showToast(errorMessage, 'error');
-        } else {
-            // Fallback: показываем ошибку в консоли
-            console.error('[refreshChats] Детали ошибки:', {
-                message: error.message,
-                stack: error.stack,
-                error: error
-            });
+            window.showToast('Ошибка при обновлении списка чатов', 'error');
         }
     }).finally(() => {
         if (refreshBtn) {

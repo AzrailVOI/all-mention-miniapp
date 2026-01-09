@@ -53,7 +53,9 @@ htmlcov/
 dmypy.json
 
 # Type checking
-*.pyi# CI/CD artifacts
+*.pyi
+
+# CI/CD artifacts
 bandit-report.json
 .bandit
 

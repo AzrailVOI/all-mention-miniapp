@@ -13,8 +13,16 @@ async function loadChats(forceRefresh = false) {
     const tg = window.Telegram.WebApp;
     
     // Получаем данные пользователя из Telegram WebApp
-    const initData = tg.initData;
+    // initData должен быть строкой с данными от Telegram WebApp
+    const initData = tg.initData || '';
     const user = tg.initDataUnsafe?.user;
+    
+    // Проверяем, что initData не пустой
+    if (!initData) {
+        const errorMsg = 'Не удалось получить данные инициализации Telegram WebApp. Убедитесь, что приложение запущено через Telegram WebApp.';
+        console.error('[ChatsAPI]', errorMsg);
+        throw new Error(errorMsg);
+    }
     
     // Проверяем offline режим
     const isOffline = window.Offline && window.Offline.isOffline();

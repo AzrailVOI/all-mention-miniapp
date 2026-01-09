@@ -10,7 +10,7 @@
 // Миксин для кнопок
 @mixin button-base {
     background: $color-primary;
-    color: $color-white !important;  // Принудительно белый текст на черном фоне
+    color: $color-white;
     border: 1px solid $color-primary;
     cursor: pointer;
     font-weight: $font-weight-semibold;
@@ -18,37 +18,13 @@
     letter-spacing: 0.5px;
     @include transition-all($transition-fast);
     
-    // Убеждаемся, что иконки тоже белые
-    i {
-        color: $color-white !important;
+    &:hover {
+        background: $color-white;
+        color: $color-primary;
     }
     
-    &:hover:not(:disabled) {
-        background: darken($color-primary, 10%);
-        color: $color-white !important;  // Белый текст при hover на черном фоне
-        
-        i {
-            color: $color-white !important;
-        }
-    }
-    
-    &:active:not(:disabled) {
-        background: darken($color-primary, 15%);
-        color: $color-white !important;  // Белый текст при active
-        
-        i {
-            color: $color-white !important;
-        }
-    }
-    
-    &:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-        color: $color-white !important;  // Белый текст даже при disabled
-        
-        i {
-            color: $color-white !important;
-        }
+    &:active {
+        background: $color-gray-light;
     }
 }
 

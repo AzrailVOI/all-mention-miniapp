@@ -30,6 +30,20 @@
         align-items: center;
         flex-wrap: wrap;
         margin-top: $spacing-sm;
+        
+        // Убеждаемся, что все кнопки в header-actions имеют правильные цвета
+        .refresh-btn,
+        .toggle-all-btn {
+            color: $color-white !important;
+            
+            span, .toggle-all-text {
+                color: $color-white !important;
+            }
+            
+            i {
+                color: $color-white !important;
+            }
+        }
     }
     
     .refresh-btn {
@@ -37,8 +51,8 @@
         align-items: center;
         gap: $spacing-sm;
         padding: $spacing-sm $spacing-md;
-        background: $color-primary !important;  // Принудительно черный фон
-        color: $color-white !important;  // Принудительно белый текст на черном фоне
+        background: $color-primary;
+        color: $color-white !important;
         border: none;
         border-radius: $border-radius;
         font-size: $font-size-sm;
@@ -46,45 +60,34 @@
         cursor: pointer;
         @include transition(all $transition-fast);
         
-        span {
-            color: $color-white !important;  // Белый текст для span
-        }
-        
-        &:hover:not(:disabled) {
-            background: darken($color-primary, 10%) !important;
-            color: $color-white !important;  // Белый текст при hover
-            transform: translateY(-1px);
-            
-            span {
-                color: $color-white !important;
-            }
-        }
-        
-        &:active:not(:disabled) {
-            background: darken($color-primary, 15%) !important;
-            color: $color-white !important;  // Белый текст при active
-            transform: translateY(0);
-            
-            span {
-                color: $color-white !important;
-            }
-        }
-        
-        &:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            background: $color-primary !important;
-            color: $color-white !important;  // Белый текст даже при disabled
-            
-            span {
-                color: $color-white !important;
-            }
+        // Убеждаемся, что текст и иконки белые
+        span, .toggle-all-text {
+            color: $color-white !important;
         }
         
         i {
             width: 16px;
             height: 16px;
-            color: $color-white !important;  // Белая иконка
+            color: $color-white !important;
+        }
+        
+        &:hover:not(:disabled) {
+            background: darken($color-primary, 10%);
+            transform: translateY(-1px);
+            color: $color-white !important;
+            
+            span, .toggle-all-text, i {
+                color: $color-white !important;
+            }
+        }
+        
+        &:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        
+        &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
         
         @keyframes spin {

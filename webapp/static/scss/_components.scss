@@ -9,60 +9,29 @@
     align-items: center;
     gap: $spacing-sm;
     white-space: nowrap;
-    background: $color-primary !important;  // Принудительно черный фон
-    color: $color-white !important;  // Принудительно белый текст на черном фоне
-    border: 1px solid $color-primary !important;
+    color: $color-white !important;
+    
+    // Убеждаемся, что текст и иконки белые
+    span, .toggle-all-text {
+        color: $color-white !important;
+    }
     
     i {
         width: 18px;
         height: 18px;
-        color: $color-white !important;  // Белая иконка
+        color: $color-white !important;
         @include transition(transform $transition-normal ease);
     }
     
     .toggle-all-text {
         font-size: $font-size-small;
-        color: $color-white !important;  // Белый текст
     }
     
-    &:hover:not(:disabled) {
-        background: darken($color-primary, 10%) !important;
-        color: $color-white !important;  // Белый текст при hover
+    &:hover {
+        color: $color-primary !important;
         
-        i {
-            color: $color-white !important;
-        }
-        
-        .toggle-all-text {
-            color: $color-white !important;
-        }
-    }
-    
-    &:active:not(:disabled) {
-        background: darken($color-primary, 15%) !important;
-        color: $color-white !important;  // Белый текст при active
-        
-        i {
-            color: $color-white !important;
-        }
-        
-        .toggle-all-text {
-            color: $color-white !important;
-        }
-    }
-    
-    &:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-        background: $color-primary !important;
-        color: $color-white !important;  // Белый текст даже при disabled
-        
-        i {
-            color: $color-white !important;
-        }
-        
-        .toggle-all-text {
-            color: $color-white !important;
+        span, .toggle-all-text, i {
+            color: $color-primary !important;
         }
     }
 }
@@ -78,59 +47,13 @@
     margin-top: $spacing-xl;
     @include transition-all($transition-normal);
     transform: scale(1);
-    background: $color-primary !important;  // Принудительно черный фон
-    color: $color-white !important;  // Принудительно белый текст на черном фоне
-    border: 1px solid $color-primary !important;
-    
-    i {
-        color: $color-white !important;  // Белая иконка
-    }
-    
-    span {
-        color: $color-white !important;  // Белый текст для span
-    }
     
     &:hover:not(:disabled) {
         transform: scale(1.02);
-        background: darken($color-primary, 10%) !important;
-        color: $color-white !important;  // Белый текст при hover
-        
-        i {
-            color: $color-white !important;
-        }
-        
-        span {
-            color: $color-white !important;
-        }
     }
     
     &:active:not(:disabled) {
         transform: scale(0.98);
-        background: darken($color-primary, 15%) !important;
-        color: $color-white !important;  // Белый текст при active
-        
-        i {
-            color: $color-white !important;
-        }
-        
-        span {
-            color: $color-white !important;
-        }
-    }
-    
-    &:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-        background: $color-primary !important;
-        color: $color-white !important;  // Белый текст даже при disabled
-        
-        i {
-            color: $color-white !important;
-        }
-        
-        span {
-            color: $color-white !important;
-        }
     }
 }
 
@@ -139,12 +62,10 @@
     padding: $spacing-md;
     @include flex-center;
     min-width: 48px;
-    color: $color-white !important;  // Принудительно белый текст
     
     i {
         width: $spacing-xl;
         height: $spacing-xl;
-        color: $color-white !important;  // Белая иконка
     }
 }
 
@@ -352,16 +273,14 @@
     font-weight: $font-weight-semibold;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    background: $color-white !important;  // Принудительно белый фон
-    color: $color-primary !important;  // Принудительно черный текст на белом фоне
+    background: $color-white;
+    color: $color-primary;
     
     &.group,
     &.supergroup,
     &.private,
     &.channel {
         border-color: $color-primary;
-        background: $color-white !important;  // Белый фон для всех типов
-        color: $color-primary !important;  // Черный текст для всех типов
     }
 }
 
