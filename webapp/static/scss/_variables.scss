@@ -9,8 +9,11 @@ $color-gray-placeholder: #999999;
 
 // Переменные шрифтов
 $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-$font-size-base: 14px;
+$font-size-xs: 10px;
+$font-size-sm: 12px;  // Алиас для font-size-small
 $font-size-small: 12px;
+$font-size-base: 14px;
+$font-size-lg: 16px;  // Алиас для font-size-large
 $font-size-large: 16px;
 $font-size-xl: 18px;
 $font-size-xxl: 24px;
@@ -33,6 +36,7 @@ $spacing-xxxl: 30px;
 $spacing-huge: 40px;
 $spacing-giant: 60px;
 
+$border-radius: 8px;  // Базовая переменная для border-radius (обычно используется средний размер)
 $border-radius-sm: 4px;
 $border-radius-md: 8px;
 $border-radius-full: 50%;
