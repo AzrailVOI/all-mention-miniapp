@@ -739,13 +739,23 @@ def health():
 @app.errorhandler(404)
 def not_found_error(error):
     """Обработчик для 404 ошибок"""
+    # Игнорируем запросы к favicon.ico, robots.txt и другим стандартным файлам
+    if request.path in ['/favicon.ico', '/robots.txt', '/apple-touch-icon.png']:
+        return '', 204  # No Content
+    
     logger.warning(f"404 ошибка: {request.url}")
     if request.path.startswith('/api/'):
         return jsonify({
             'success': False,
             'error': 'Endpoint не найден'
         }), 404
-    return render_template('404.html'), 404
+    
+    # Для обычных запросов возвращаем простой HTML ответ
+    # Если шаблон не найден, возвращаем простой текст
+    try:
+        return render_template('404.html'), 404
+    except Exception:
+        return '<h1>404 Not Found</h1><p>Запрашиваемая страница не найдена.</p>', 404
 
 
 @app.errorhandler(500)
@@ -774,7 +784,12 @@ def bad_request_error(error):
             'success': False,
             'error': 'Неверный запрос'
         }), 400
-    return render_template('400.html'), 400
+    # Для обычных запросов возвращаем простой HTML ответ
+    # Если шаблон не найден, возвращаем простой текст
+    try:
+        return render_template('400.html'), 400
+    except Exception:
+        return '<h1>400 Bad Request</h1><p>Неверный запрос.</p>', 400
 
 
 @app.errorhandler(403)
@@ -786,7 +801,12 @@ def forbidden_error(error):
             'success': False,
             'error': 'Доступ запрещен'
         }), 403
-    return render_template('403.html'), 403
+    # Для обычных запросов возвращаем простой HTML ответ
+    # Если шаблон не найден, возвращаем простой текст
+    try:
+        return render_template('403.html'), 403
+    except Exception:
+        return '<h1>403 Forbidden</h1><p>Доступ запрещен.</p>', 403
 
 
 @app.errorhandler(429)
@@ -798,7 +818,12 @@ def ratelimit_error(error):
             'success': False,
             'error': 'Превышен лимит запросов. Попробуйте позже.'
         }), 429
-    return render_template('429.html'), 429
+    # Для обычных запросов возвращаем простой HTML ответ
+    # Если шаблон не найден, возвращаем простой текст
+    try:
+        return render_template('429.html'), 429
+    except Exception:
+        return '<h1>429 Too Many Requests</h1><p>Превышен лимит запросов. Попробуйте позже.</p>', 429
 
 
 @app.errorhandler(Exception)
